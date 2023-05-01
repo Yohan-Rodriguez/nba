@@ -1,0 +1,5 @@
+1) cambiar el nombre de la columnda date, en la database
+2) Scroll a la página cuando se actualiza yq ueda en la misma liga
+3) Envío de errores a la tabla "t_errors" cuando esta en los últimos partidos y toma los lugares vacios como erroes.
+4) -1 en el conteo regresivo de 5 segundo en "def search_xpath()"
+5) Revisar la lógica para la liga de brazil
