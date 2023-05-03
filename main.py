@@ -20,8 +20,11 @@ def conn_main():
 # STATISTICS                                                                                                           #
 # ==================================================================================================================== #
 def see_statistics():
+    # Solicitud de información a la tabla "analysis_basketball".teams con el id de liga dado
+    list_id_leagues = [441, 485, 546, 705, 756, 819]
+
     # open_browser.catch_match()
-    calculate_statistics.get_data()
+    calculate_statistics.get_data(list_id_leagues)
 # END --------- STATISTICS                                                                                         # # #
 # ==================================================================================================================== #
 

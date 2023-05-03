@@ -1,3 +1,4 @@
 *.sql text eol=lf
 *.txt text eol=lf
 .idea/inspectionProfiles/* text eol=lf
+todo.txt text eol=lf
