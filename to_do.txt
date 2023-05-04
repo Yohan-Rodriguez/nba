@@ -1,6 +1,0 @@
-1) Revisar lógica con el nuevo diseño de la base de datos.
-2) Estudiar estructura de las páginas de las ligas por paises. 
-3) Diseñar el formato de mostrar las estadísticas de un partido en vivo. 
-4) Diseñar estructura de la actualización diaria del historia.
-5) -1 en el conteo regresivo de 5 segundo en "def search_xpath()".
-6) Revisar la lógica para la liga de brazil.

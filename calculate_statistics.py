@@ -1,6 +1,5 @@
 import pandas as pd
-import connections
-from random import randint
+from conn import connections
 
 
 def calc_statistics_quarters(df_data_teams, i_name, i_q, i_ishome):
@@ -148,7 +147,7 @@ def calc_statistics(result_data):
 
     for i_sent in range(-12, len(list_statistics_teams)-12, 12):
 
-        connections.conn_insert_table_statistics(list_statistics_teams[i_sent+12], list_statistics_teams[i_sent+23][0],
+        connections.conn_insert_table_statistics(list_statistics_teams[i_sent + 12], list_statistics_teams[i_sent + 23][0],
                                                  list_statistics_teams[i_sent+23][1], list_statistics_teams[i_sent+23][2],
                                                  list_statistics_teams[i_sent+23][3], list_statistics_teams[i_sent+22][0],
                                                  list_statistics_teams[i_sent+22][1], list_statistics_teams[i_sent+22][2],

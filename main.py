@@ -4,6 +4,7 @@
 
 import open_browser
 import calculate_statistics
+import tests
 
 
 # ==================================================================================================================== #
@@ -32,10 +33,12 @@ def see_statistics():
 # ==================================================================================================================== #
 # FUNCTIONS CALLS                                                                                                      #
 # ==================================================================================================================== #
-# # Generar historial de equipos para guardar en la base de datos
-# conn_main()
+# Generar historial de equipos para guardar en la base de datos
+conn_main()
 
-# Generar estadísticas de los equipos
-see_statistics()
+# # Generar estadísticas de los equipos
+# see_statistics()
 # END --------- FUNCTIONS CALLS                                                                                    # # #
 # ==================================================================================================================== #
+
+# tests.testing()
