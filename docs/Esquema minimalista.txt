@@ -1,3 +1,15 @@
+Buscar xpaths representativos de cada pagína de liga
+
+Clic en el último partido del la sección "div de 10 partidos", para dirigir la visualización de la 
+página a esta sección de partidos.
+
+Definir xpath button_previously
+
+Verificar si el partido ya terminó (FT)
+
+Guardar Fecha, nombre de equipos, puntos por cuarto y pusnto totales
+
+
 Guardar id_league
 
 Recore todos los partidos de la liga	

@@ -5,7 +5,9 @@ from selenium.webdriver.common.by import By
 import check_db_and_controllers.check_data_in_db as ck
 from conn import connections
 import links
-
+from check_db_and_controllers import css_verification
+import re
+import prepare_and_sent_data as psd
 
 # ==================================================================================================================== #
 # OPEN BROWSER                                                                                                         #
@@ -32,17 +34,16 @@ def conn_web():
 
     # Eliminar la "fiba-world-cup" porque no ha iniciado aún
     list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/international/fiba-world-cup/441')
-    list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/usa/nba/132')
-    list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/international/euroleague/138')
+    # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/usa/nba/132')
+    # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/international/euroleague/138')
     # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/greece/a1/304')
-    list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/italy/serie-a/262')
-    list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/spain/liga-acb/264')
-    list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/international/admiralbet-aba-league/235')
+    # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/italy/serie-a/262')
+    # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/spain/liga-acb/264')
+    # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/international/admiralbet-aba-league/235')
     # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/brazil/nbb/1562')
 
     # eurocup tiene unos xpath que aún no he definido
     list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/international/eurocup/141')
-
     # END --------- ACCESS LINKS LEAGUES                                                                           # # #
     # ================================================================================================================ #
 
@@ -51,17 +52,18 @@ def conn_web():
     # ================================================================================================================ #
     # Si la función "search_button()" no logra encontrar el "button.previously"
     # me regresa un String vació
-    def search_button(xpath):
+    def search_button(selector_css_button):
         # Salida de emergencia al siguiente bucle para evitar que sea infinito
-        flag_emergency_button = 5
+        flag_emergency_button = 3
 
         while True:
             try:
-                button_previous = driver.find_element(By.XPATH, xpath)
+                button_previous = driver.find_element(By.CSS_SELECTOR, selector_css_button)
                 break
 
             except Exception:
-                print(f'Reintentando obtener XPATH de "button.previously".\nTiempo Restante: -{flag_emergency_button} s')
+                print(
+                    f'Reintentando obtener XPATH de "button.previously".\nTiempo Restante: -{flag_emergency_button} s')
                 time.sleep(1)
 
                 if flag_emergency_button <= 0:
@@ -71,6 +73,7 @@ def conn_web():
                 flag_emergency_button -= 1
 
         return button_previous
+
     # END --------- FUNCTION search_button()                                                                           #
     # ================================================================================================================ #
 
@@ -102,101 +105,47 @@ def conn_web():
         try:
             ck.check_name_league(new_name_league)
             query = f'''SELECT id_league FROM leagues 
-                        WHERE name_league = "{ck.list_names_leagues[-1]}"'''
+                            WHERE name_league = "{ck.list_names_leagues[-1]}"'''
             current_id_league = connections.select_row(query)[0][0]
 
+            def identify_css_league(identifier, i_name_league, add_identifier):
+                identifier = identifier
+                if new_name_league.__contains__(f'{i_name_league}'):
+                    identifier += add_identifier
+
+                return identifier
+
+            # "flag_brazil = 0" para ligas top diferentes a "Brazil - NBB"
+            # "flag_brazil = 1" para la liga top "Brazil - NBB"
+            flag_brazil = identify_css_league(identifier=0, i_name_league='brazil - nbb', add_identifier=1)
+
+            # "identifier_league = 5" para ligas top diferentes a "eurocop"
+            # "identifier_league = 6" para la liga top "eurocop"
+            identifier_league = identify_css_league(identifier=5, i_name_league='international - eurocup', add_identifier=1)
             # END --------- NOMBRE DE LA LIGA Y ENVIAR DATA A LA TABLE "basketball.leagues"                            # # #
             # ============================================================================================================ #
 
             # Recargar la página
             driver.get(f'{new_tab_open}')
 
-            # ============================================================================================================ #
-            # BUSCAR SECCIÓN "MATCHES"                                                                                     #
-            # ============================================================================================================ #
-            # Llamada de la función "search_button()" según la estructura a de la página de cada liga
-            # y determinar XPATH del partido número [10] de la sección "MATCH"
-
-            # Devuelve una lista con los xpaths "match" return list_xpath_match"
-            # xpath_to_used_match = "list_xpath_match[xpath_match_1, xpath_match_1]"
-            xpath_to_used_match = xpaths_verification.verification_xpath_match()
-
-            # ======================================================================================================== #
-            # BUSCAR XPATH REPRESENTATIVO DE PÁGINA                                                                    #
-            # ======================================================================================================== #
-
-            # Función para buscar xpath representativo de la cada página de liga ===================================== #
-            def check_xpath_page(xpath_displayed_temp, i_position_temp):
-
-                # Bandera que determina si el código entra o no al siguiente if
-                is_flat_xpath_page_found = False
-                print(f'i_position_temp: {i_position_temp}')
-
-                try:
-                    # El XPATH en el if y el elif son propios de cada página y determinan los xpaths que se utilizaran
-                    if driver.find_element(By.XPATH, f'{xpath_displayed_temp}').is_displayed():
-                        print(f'Entro el i_position_temp: {i_position_temp}')
-
-                        is_flat_xpath_page_found = True
-
-                        # Sí no entra al if anterior, se genera una exception en el return
-                        # porque las variables están dentro del scope del mismo if
-                        return is_flat_xpath_page_found, i_position_temp
-
-                except Exception as e:
-                    print(f'Xptah is_displayed() no encontrado\n{e}')
-                    pass
-            # END --------- Función para buscar xpath representativo de la cada página de liga ======================= #
-
-            # Bandera para seleccionar los Xpath a usar que sirven dentro de la página de la liga actual.
-            # Sí es 0, borrará los impares
-            flag_xpath = 0
-
-            # Declarar tuple_path como None para que sea variable global (fuera del scope del siguiente for)
-            tuple_xpath_is_displayed = None
-
-            # Llamar a la función "verification_xpath_displayed()"
-            xpath_displayed = xpaths_verification.verification_xpath_displayed()
-            for i_position in range(2):
-                # xpath_displayed[i_position] = xpath_displayed[[0] ó [1]]
-                # Llamar a la función "check_xpath_page()"
-                # Si se genera la exception, "tuple_xpath_is_displayed = None"
-
-                tuple_xpath_is_displayed = check_xpath_page(xpath_displayed[i_position], i_position)
-
-                try:
-                    # si se devuelve "is_flat_xpath_page_found = True":
-                    if tuple_xpath_is_displayed[0]:
-                        # tuple_path[0]click() = xpath_search_match.click()
-                        break
-
-                except Exception:
-                    if i_position == 1:
-                        raise Exception('Exception INTENCIONAL (PROVOCADO mediante "raise"):\nXPATH reprensentativo de la página no encontrado.')
-
-                    else:
-                        pass
-
-            # xpath_to_used_match[tuple_xpath_is_displayed[1]] = list_xpath_match[tuple_xpath_is_displayed[1]]
-            # En esta posición "([1])" está el xpath del último partido en el "Div 10 Matches"
-            # Dar clic en ese XPATH dirigir la página de la liga a la sección del "DIV 10 MATCHES"
-            driver.find_element(By.XPATH, xpath_to_used_match[tuple_xpath_is_displayed[1]]).click()
-            # Si el xpath del "button.previous" está mal, está exception se trata en el "try" general y
-            # se carga la proxima liga.
-
-            # 'xpath_button_previous = list_xpath_button_previous[]'. xpath_button_previous :: str
-            # list_xpath_button_previous[] contiene los diferentes xpath's de "button_previously"
-            # para cada tipo de página de liga
-            xpath_button_previous = xpaths_verification.get_xpath_button()[tuple_xpath_is_displayed[1]]
-            # END --------- BUSCAR XPATH REPRESENTATIVO DE PÁGINA                                                  # # #
-            # ======================================================================================================== #
-
             # controladores del "button_previous"
             # Clics iniciales en "button.previous" cada vez que se recarga la página inicial
+
+            # Selector CSS del button.previous
+            # selector_button_previous :: str
+            selector_button_previous = css_verification.get_selectors_css_top_leagues(identifier_league)[2 + flag_brazil]
+            button_previous = search_button(selector_button_previous)
+            driver.execute_script("arguments[0].click();", button_previous)
+
+            # Selector CSS del botón NEXT"
+            # selector_css_next :: str
+            selector_css_next = css_verification.get_selectors_css_top_leagues(identifier_league)[4 + flag_brazil]
+            button_next = search_button(selector_css_next)
+            driver.execute_script("arguments[0].click();", button_next)
+
             count_initial_clicks = 0
             # Número de clics sobre "button.previous" durante la ejecución del programa
             count_match_clicks = 70
-
             # ============================================================================================================ #
             # RELOAD PAGES                                                                                                 #
             # ============================================================================================================ #
@@ -205,6 +154,7 @@ def conn_web():
 
             # Bucle encargado de recargar la página cada "count_match_clicks" clics en button.previous en "POST INITIAL"
             while True:
+
                 # ======================================================================================================== #
                 # CLICK ON PREVIOUS (INITIAL)                                                                              #
                 # ======================================================================================================== #
@@ -218,7 +168,7 @@ def conn_web():
                     while count_initial_clicks_temp < count_initial_clicks:
                         # Parámetro del botón previously
                         # tuple_path[2] = xpath_button_previous :: str
-                        button_previous = search_button(xpath_button_previous)
+                        button_previous = search_button(selector_button_previous)
 
                         try:
                             if button_previous.is_displayed():
@@ -251,244 +201,87 @@ def conn_web():
 
                 # Bucle para darle 'n' clics sobre el "button.previous" dependiendo de "count_match_clicks".
                 while count_match_clicks_test < count_match_clicks:
-                    # ==================================================================================================== #
-                    # RECORRE EL <div> QUE CONTIENE LOS 10 MATCHES                                                         #
-                    # ==================================================================================================== #
-                    # Bucle para extraer información cada vez que se hace clic en 'Previous' con el 'button_previous.clic()'.
-                    # Se cargan 10 partidos con cada clic sobre "button.previous":
+                    try:
+                        # Selector CSS de la sección "DIV 1 to 10 MACTHES"
+                        # selector_section_10_matches :: str
+                        selector_section_10_matches = css_verification.get_selectors_css_top_leagues(identifier_league)[0 + flag_brazil]
 
-                    for match in range(10, 0, -1):
-                        try:
-                            # ============================================================================================ #
-                            # VERIFICAR QUE EL PARTIDO YA HAYA FINALIZADO                                                  #
-                            # ============================================================================================ #
-                            # No uso try-except porque es poco probable que ocurra en esta sección
-                            # Si ocurre una exception, esta se atrapa en "EXCEPTIONS CONTROL"
+                        # Lista a partir del string con saltos de línea obtenido con ".text".
+                        # Cada salto de línea representa un nuevo elemento en la lista (splitlines())
+                        section_10_matches = driver.find_element(By.CSS_SELECTOR, selector_section_10_matches).text.splitlines()
 
-                            # Lista con los paths que funcionan en la liga actual
-                            # "return list_xpath_to_used"
-                            # tuple_path[1] = flag_xpath
-                            xpath_to_use_gral = xpaths_verification.get_xpath_with_match(match=match)
+                        # Comprensión de lista
+                        # [nuevo_valor_si_condición_verdadera if condición else nuevo_valor_si_condición_falsa for valor in lista_original]
+                        load_section_10_matches = [palabra.replace(' ', '-') if ' ' in palabra else palabra for palabra in section_10_matches]
 
-                            # Fecha del partido
-                            # (0 ó 1) dependiendo el retorno de tuple_xpath_is_displayed]
-                            div_date_match_main = driver.find_element(By.XPATH, xpath_to_use_gral[tuple_xpath_is_displayed[1]]).text
-                            div_date_match_2 = driver.find_element(By.XPATH, xpath_to_use_gral[tuple_xpath_is_displayed[1]]).text.split('/')
+                        # Pasar una lista de string´s a una única cadena de carácteres
+                        # data_section_10_matches :: str
+                        data_section_10_matches = ' '.join(load_section_10_matches)
 
-                            # Parámetro para verificar si el partido ha finalizado ("FT" or "AET")
-                            # (2 + (0 ó 1)) dependiendo el retorno de tuple_xpath_is_displayed]
-                            div_FT_match_test = driver.find_element(By.XPATH, xpath_to_use_gral[2+tuple_xpath_is_displayed[1]]).text
+                        # Crear patron de expresiones regulares para las fechas
+                        # r:"raw string" Le dice a python que no omita el comportamiento de los caracteres
+                        #   especiales dentro del string- Ej: '\n'
+                        # \d: Se espera una expresion regular de un digito.
+                        # {2}: Se esperan dos ocurrecias del digito (\d)
+                        # /: caracter normal de división de fecha (00/00/00)
+                        patron = re.compile(r"\d{2}/\d{2}/\d{2}")
 
-                            # Inicialización de la bandera para seguir o no con el proceso, sí el partido ya finalizó
-                            flag_ft = False
+                        # Buscar todas las ocurrencias de la fecha en el string generado con ".join()"
+                        # list_dates :: list of str
+                        list_dates = patron.findall(data_section_10_matches)
 
-                            # si el partido ya finalizó:
-                            if div_date_match_main.__contains__('/') and (div_FT_match_test.__contains__('FT') or div_FT_match_test.__contains__('AET')):
-                                # Formato de fecha para enviar a la base de datos
-                                date_match = ''.join([div_date_match_2[2], '-', div_date_match_2[1], '-' + div_date_match_2[0]])
+                        # Dividir el texto en cada ocurrencia de la fecha
+                        list_data_section_10_matches_split = re.split(patron, data_section_10_matches)
 
-                                flag_ft = True
-                            # END --------- VERIFICAR QUE EL PARTIDO YA HAYA FINALIZADO                                # # #
-                            # ============================================================================================ #
+                        # Unir "list_data_section_10_matches_split"  y
+                        # "list_data_section_10_matches_split" en una sola lista.
+                        list_match = [list_data_section_10_matches_split[0]]
+                        for i_add_list in range(len(list_dates)):
+                            list_match.append(list_dates[i_add_list])
+                            list_match.append(list_data_section_10_matches_split[i_add_list + 1])
+                        # Ej "list_match = ['PREVIOUS A1 Box-score ', '09/04/23', ' FT AEK Olympiacos 19 16 18 25 22 16 29 18 78 85 ',
+                        #                  '20/04/23',...,  '30/04/23', ' FT PAOK Promitheas 23 24 17 17 21 21 15 21 81 78']"
 
-                            while flag_ft:
-                                # ======================================================================================== #
-                                # DATA COLLECTION                                                                          #
-                                # ======================================================================================== #
-                                try:
+                        for i_splait in range(-2, (-1) * len(list_match), -2):
+                            # i_splait toma valore pares negativos (-2, -4, -6, ... ,)
+                            # Buscar si la posición es un string que hace referencia una
+                            # fecha (00/00/00) con una expresión regular 'r"\d{2}/\d{2}/\d{2}"'
+                            if re.search(patron, list_match[i_splait]):
+                                list_match_temp = list_match[i_splait + 1].split()
+                                # list_match_temp = Ej: ...
+                                # ... ['FT', 'PAOK', 'Promitheas', ' 23', '24', '17', '17','OT_h', '21', '21', '15', '21', 'OT_a', '81', '78']
 
-                                    # Nombre de los equipos:
-                                    # (4 + (0 ó 1)) dependiendo el retorno de tuple_xpath_is_displayed]
-                                    # (6 + (0 ó 1)) dependiendo el retorno de tuple_xpath_is_displayed]
-                                    div_name_home = driver.find_element(By.XPATH, xpath_to_use_gral[4+tuple_xpath_is_displayed[1]]).text
-                                    div_name_away = driver.find_element(By.XPATH, xpath_to_use_gral[6+tuple_xpath_is_displayed[1]]).text
+                                if list_match_temp[0].__contains__('FT') or list_match_temp[0].__contains__('AET'):
+                                    date_match = list_match[i_splait]
 
-                                    # Lista str con los puntos por cuarto de home y away
-                                    # (8 + (0 ó 1)) dependiendo el retorno de tuple_xpath_is_displayed]
-                                    # (10 + (0 ó 1)) dependiendo el retorno de tuple_xpath_is_displayed]
-                                    div_list_PointsHome = driver.find_element(By.XPATH, xpath_to_use_gral[8+tuple_xpath_is_displayed[1]]).text.splitlines()
-                                    div_list_PointsAway = driver.find_element(By.XPATH, xpath_to_use_gral[10+tuple_xpath_is_displayed[1]]).text.splitlines()
-
-                                    # Puntos finales de home y away.
-                                    # (12 + (0 ó 1)) dependiendo el retorno de tuple_xpath_is_displayed]
-                                    # (14 + (0 ó 1)) dependiendo el retorno de tuple_xpath_is_displayed]
-                                    div_points_final_home = int(driver.find_element(By.XPATH, xpath_to_use_gral[12+tuple_xpath_is_displayed[1]]).text)
-                                    div_points_final_away = int(driver.find_element(By.XPATH, xpath_to_use_gral[14+tuple_xpath_is_displayed[1]]).text)
-
-                                except Exception:
-                                    print('Exception in DATA COLLECTION.')
-                                # ======================================================================================== #
-                                # END --------- DATA COLLECTION                                                            #
-                                # ======================================================================================== #
-
-                                # ======================================================================================== #
-                                # CASTEO STR-TO-INT PUNTOS POR CUARTO DE CADA EQUIPO                                       #
-                                # ======================================================================================== #
-                                try:
-                                    # Listas para guardar los puntos X cuarto para cada equipo.
-                                    div_list_PointsHome_Int = []
-                                    div_list_PointsAway_Int = []
-
-                                    for casteo_int in range(len(div_list_PointsHome)):
-                                        # Puntos de cada cuarto en formato INTEGER para Home
-                                        div_list_PointsHome_Int.append(int(div_list_PointsHome[casteo_int]))
-
-                                        # Puntos de cada cuarto en formato INTEGER para Away
-                                        div_list_PointsAway_Int.append(int(div_list_PointsAway[casteo_int]))
-
-                                except Exception:
-                                    print('Exception in CASTEO STR-TO-INT PUNTOS POR CUARTO DE CADA EQUIPO.')
-                                # END --------- CASTEO STR-TO-INT PUNTOS POR CUARTO DE CADA EQUIPO                     # # #
-                                # ======================================================================================== #
-
-                                # ======================================================================================== #
-                                # VERIFICAR OVERTIME (OT)                                                                  #
-                                # ======================================================================================== #
-                                try:
-                                    # Si el partido tiene OverTime:
-                                    if div_FT_match_test.__contains__('AET'):
-                                        # Add que el partido si tuvo overtime.
+                                    over_time = False
+                                    # Verificar si el partido tuvó overtime
+                                    # 8 posiciones de puntos por cuartos,
+                                    # 2 posiciones del puntaje del Oer Time
+                                    # 2 pósicones de puntajes finales (resultado_temp[-12])
+                                    if list_match_temp[-12].isdigit():
+                                        # Si hubo overtime
                                         over_time = True
+                                        home_away_date = psd.prepare_data(current_id_league, list_match_temp, date_match,
+                                                                          -1, -2, -4, -5, -6, -7, -9, -10, -11, -12, -13,
+                                                                          -14, over_time)
 
-                                    # Si el partido no tiene OverTime:
-                                    else:
-                                        # Add que el partido no tuvo overtime
-                                        over_time = False
+                                    elif list_match_temp[-10].isdigit():
+                                        # No hubo overtime
+                                        # ... ['FT', 'PAOK', 'Promitheas', 23', '24', '17', '17', '21', '21', '15', '21', '81', '78']
+                                        home_away_date = psd.prepare_data(current_id_league, list_match_temp, date_match, -1,
+                                                                          -2, -3, -4, -5, -6, -7, -8, -9, -10, -11,
+                                                                          -12, over_time)
+                    # ================================================================================================ #
+                    # EXCEPTIONS CONTROL                                                                               #
+                    # ================================================================================================ #
+                    except Exception as e:
+                        print(f'Exception in for match (10, 0, -1)\n{e}')
 
-                                except Exception:
-                                    # Imprimir Type Exception
-                                    print('Exception in OVERTIME VERIFICATION')
-                                # END --------- VERIFICAR OVERTIME (OT)                                                # # #
-                                # ======================================================================================== #
 
-                                # ======================================================================================== #
-                                # PREPARAR Y ENVIAR LA DATA A LA BD                                                        #
-                                # ======================================================================================== #
-                                try:
-                                    q_1H = div_list_PointsHome_Int[0]
-                                    q_1A = div_list_PointsAway_Int[0]
-                                    q_2H = div_list_PointsHome_Int[1]
-                                    q_2A = div_list_PointsAway_Int[1]
-                                    q_3H = div_list_PointsHome_Int[2]
-                                    q_3A = div_list_PointsAway_Int[2]
-                                    q_4H = div_list_PointsHome_Int[3]
-                                    q_4A = div_list_PointsAway_Int[3]
-
-                                    # Determinar si el equipo ganó o perdió.
-                                    is_win_home = False
-                                    is_win_away = False
-                                    if (div_points_final_home - div_points_final_away) > 0:
-                                        is_win_home = True
-                                    else:
-                                        is_win_away = True
-
-                                    # ==================================================================================== #
-                                    # SENDING DATA TO BD                                                                   #
-                                    # ==================================================================================== #
-
-                                    # Función para enviar los datos a "t_teams" y "t_matches" ============================ #
-                                    def send_data_to_teams_and_matchs(teams_id_team, id_match, date_match, is_home,
-                                                                      total_points, q_1, q_2, q_3, q_4, over_time, is_win,
-                                                                      home_or_away):
-
-                                        # Enviar data a "t_matches"
-                                        print(f'Sending data to "analysis_basketball.matches" for {home_or_away}.')
-                                        connections.conn_db_table_matches(id_match, date_match, is_home, total_points, q_1,
-                                                                          q_2, q_3, q_4, over_time, is_win)
-
-                                        # Enviar data a "t_teams_has_matches"
-                                        print(f'Sending data to "analysis_basketball.teams_has_matches" for {home_or_away}.')
-                                        connections.conn_db_table_teams_has_matches(teams_id_team, id_match)
-                                    # END --------- Función para enviar los datos a "t_teams" y "t_matches" ============== #
-
-                                    try:
-                                        list_names_teams = [div_name_home, div_name_away]
-
-                                        # 2 repeticiones:
-                                        # i_send_data_t_team == 0 para home y
-                                        # i_send_data_t_team == 1 para away.
-                                        for i_send_data_t_team in range(2):
-                                            # Generar id_match
-                                            id_match = ck.check_id_match()
-
-                                            # Verificar que el nombre de los equipos están o no, relacionados en "t_team"
-                                            # Sí el equipo no existe en t_teams, se guarda dentro del scope de la función
-                                            # "ck.check_name_team"
-                                            teams_id_team = ck.check_name_team(list_names_teams[i_send_data_t_team],
-                                                                               current_id_league,
-                                                                               home_or_away=i_send_data_t_team)
-
-                                            if i_send_data_t_team == 0:
-                                                # Enviar data de home a "t_matches"
-                                                send_data_to_teams_and_matchs(teams_id_team, id_match, date_match, True,
-                                                                              div_points_final_home, q_1H, q_2H, q_3H, q_4H,
-                                                                              over_time, is_win_home,
-                                                                              home_or_away=i_send_data_t_team)
-
-                                            elif i_send_data_t_team == 1:
-                                                # Enviar data de away a "t_team" y a "t_matches"
-                                                send_data_to_teams_and_matchs(teams_id_team, id_match, date_match, False,
-                                                                              div_points_final_away, q_1A, q_2A, q_3A, q_4A,
-                                                                              over_time, is_win_away,
-                                                                              home_or_away=i_send_data_t_team)
-
-                                        print('Completed Finish match -----------------------------')
-
-                                    except Exception as e:
-                                        print(f'Exception in SENDING DATA TO BD\n {e}')
-
-                                    break
-                                    # ==================================================================================== #
-                                    # END --------- SENDING DATA TO BD                                                     #
-                                    # ==================================================================================== #
-
-                                except Exception as e:
-                                    # print Exception
-                                    print(f'Exception in PREPARAR Y ENVIAR LA DATA A LA DB.\n{e}')
-                                # END --------- PREPARAR Y ENVIAR LA DATA A LA BD                                      # # #
-                                # ======================================================================================== #
-
-                        # ================================================================================================ #
-                        # EXCEPTIONS CONTROL                                                                               #
-                        # ================================================================================================ #
-                        except Exception as e:
-                            print(f'Exception in for match (10, 0, -1)\n{e}')
-                            try:
-                                try:
-                                    name_league = ck.list_names_leagues[-1]
-                                    query_league = f'SELECT id_league FROM leagues WHERE name = "{name_league}"'
-                                    id_error = connections.select_row(query_league)
-
-                                except Exception:
-                                    id_error = 0000
-
-                                # Envía Data del partido con error, a la tabla "basketball.errors" el ID de la liga y los nombres reales.
-                                connections.connection_db_t_errors(id_error, date_match, div_name_home, div_name_away)
-
-                            except Exception as e:
-                                print(f'EXCEPTION INSIDE MATCH - NO DATA error.\n{e}')
-
-                                try:
-                                    # Envía Data del partido con error, a la tabla "basketball.errors" con los nombres reales de los equipos.
-                                    connections.connection_db_t_errors(id_error, '1993-06-21', div_name_home,
-                                                                       div_name_away)
-
-                                except Exception:
-                                    try:
-                                        # Envía Data por defecto del partido con error, a la tabla "basketball.errors"
-                                        connections.connection_db_t_errors(id_error, '1993-06-21', 'No', 'No')
-
-                                    except Exception as e:
-                                        print(f'NO DATA FOR BD_error X+X+X+X+X+X+X+X+X+X+X+X\n{e}')
-                                        continue
-
-                                    continue
-
-                                continue
-
-                            continue
-                        # END --------- EXCEPTIONS CONTROL                                                             # # #
-                        # ================================================================================================ #
+                        continue
+                    # END --------- EXCEPTIONS CONTROL                                                             # # #
+                    # ================================================================================================ #
 
                     # END --------- RECORRER EL <div> QUE CONTIENE LOS 10 MATCHES                                      # # #
                     # ==================================================================================================== #
@@ -501,7 +294,7 @@ def conn_web():
 
                     try:
                         # Parámetro del botón previously
-                        button_previous = search_button(xpath_button_previous)
+                        button_previous = search_button(selector_button_previous)
 
                         # Dar clic en "button.previous" por medio de un script de js
                         driver.execute_script("arguments[0].click();", button_previous)
@@ -511,7 +304,7 @@ def conn_web():
                     except Exception:
                         try:
                             # Parámetro del botón previously
-                            button_previous = search_button(xpath_button_previous)
+                            button_previous = search_button(selector_button_previous)
 
                             # Dar clic en "button.previous" por medio de un script de js
                             driver.execute_script("arguments[0].click();", button_previous)
@@ -528,30 +321,48 @@ def conn_web():
                 if flag_end_history:
                     break
 
-                count_initial_clicks += (count_match_clicks+1)
+                count_initial_clicks += (count_match_clicks + 1)
                 print('Actualizar Página')
                 driver.refresh()
 
             print(textwrap.dedent('''Final historial de partidos de la liga actual.
-                                 Iniciar nueva DATA COLLECTION con la siguiente liga.'''))
+                                             Iniciar nueva DATA COLLECTION con la siguiente liga.'''))
 
             # ============================================================================================================ #
             # END --------- RELOAD PAGES                                                                                   #
             # ============================================================================================================ #
+
         except Exception as e:
             print(e)
+            try:
+                name_league = ck.list_names_leagues[-1]
+                connections.connection_db_t_errors(name_league)
 
+            except Exception as e:
+                try:
+                    name_league = str(len(ck.list_names_leagues))
+                    connections.connection_db_t_errors(name_league)
+
+                except Exception:
+                    print(f'NO DATA FOR BD_error X+X+X+X+X+X+X+X+X+X+X+X\n{e}')
+                    continue
+
+                continue
+
+            continue
+
+        print(str(len(list_links_leagues) - 1), str(change_league))
         # Cargar nueva liga
-        if (len(list_links_leagues)-1) > change_league:
+        if (len(list_links_leagues) - 1) > change_league:
             change_league += 1
             print('Cambio de liga.')
 
         else:
             print('Fin de las ligas.')
             break
-    # ================================================================================================================ #
-    # END --------- ACCESS LEAGUES                                                                                     #
-    # ================================================================================================================ #
+        # ================================================================================================================ #
+        # END --------- ACCESS LEAGUES                                                                                     #
+        # ================================================================================================================ #
 
     # Cerrar navegador
     driver.quit()
