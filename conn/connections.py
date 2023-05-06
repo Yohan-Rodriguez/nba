@@ -7,7 +7,7 @@ import mysql.connector
 host_default = 'localhost'
 user_default = 'root'
 pass_default = 'admin'
-database_default = 'analysis_basketball_test'
+database_default = 'analysis_basketball'
 # END: Atributos                                                                                                   # # #
 # ==================================================================================================================== #
 
@@ -68,11 +68,11 @@ def conn_db_table_leagues(id_league, name_league):
 # ==================================================================================================================== #
 # TABLE "analysis_basketball.teams"                                                                                    #
 # ==================================================================================================================== #
-def conn_db_table_team(id_team, name_team):
-    query = f'''INSERT INTO team (id_team, name_team) VALUES ({id_team}, '{name_team}')'''
+def conn_db_table_teams(id_team, name_team):
+    query = f'''INSERT INTO teams (id_team, name_team) VALUES ({id_team}, '{name_team}')'''
     insert_row(query=query)
 
-    print('Executed TABLE "team".')
+    print('Executed TABLE "teams".')
 # END --------- TABLE "analysis_basketball.teams"                                                                  # # #
 # ==================================================================================================================== #
 
@@ -80,12 +80,12 @@ def conn_db_table_team(id_team, name_team):
 # ==================================================================================================================== #
 # TABLE "analysis_basketball.teams"                                                                                    #
 # ==================================================================================================================== #
-def conn_db_table_team_has_leagues(team_id_team, leagues_id_league):
-    query = f'''INSERT INTO team_has_leagues (team_id_team, leagues_id_league) VALUES ({team_id_team}, 
+def conn_db_table_teams_has_leagues(teams_id_team, leagues_id_league):
+    query = f'''INSERT INTO teams_has_leagues (teams_id_team, leagues_id_league) VALUES ({teams_id_team}, 
     '{leagues_id_league}')'''
     insert_row(query=query)
 
-    print('Executed TABLE "team_has_leagues".')
+    print('Executed TABLE "teams_has_leagues".')
 # END --------- TABLE "analysis_basketball.teams"                                                                  # # #
 # ==================================================================================================================== #
 
@@ -108,12 +108,12 @@ def conn_db_table_matches(id_match, date_match, is_home, total_points, q_1, q_2,
 # ==================================================================================================================== #
 # TABLE "analysis_basketball.teams"                                                                                    #
 # ==================================================================================================================== #
-def conn_db_table_team_has_matches(team_id_team, matches_id_match):
-    query = f'''INSERT INTO team_has_matches (team_id_team, matches_id_match) VALUES ({team_id_team}, 
+def conn_db_table_teams_has_matches(teams_id_team, matches_id_match):
+    query = f'''INSERT INTO teams_has_matches (teams_id_team, matches_id_match) VALUES ({teams_id_team}, 
                 '{matches_id_match}')'''
     insert_row(query=query)
 
-    print('Executed TABLE "team_has_matches".')
+    print('Executed TABLE "teams_has_matches".')
 # END --------- TABLE "analysis_basketball.teams"                                                                  # # #
 # ==================================================================================================================== #
 
@@ -151,9 +151,8 @@ def conn_insert_table_statistics(name_team, avg_gral, mdn_gral, max_gral, min_gr
 # ==================================================================================================================== #
 # TABLE "analysis_basketball.errors"                                                                                   #
 # ==================================================================================================================== #
-def connection_db_t_errors(id_error, date_match, div_name_home, div_name_away):
-    query = f'''INSERT INTO t_errors (id_error, date_error, home, away) VALUES ({id_error}, '{date_match}', 
-               '{div_name_home}', '{div_name_away}')'''
+def connection_db_t_errors(name_league):
+    query = f'''INSERT INTO t_errors (league_error) VALUES ('{name_league}')'''
     insert_row(query=query)
 
     print('Executed TABLE "t_errors" X+X+X+X+X+X+XX+X -----------')

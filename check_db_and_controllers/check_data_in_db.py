@@ -3,7 +3,7 @@ from conn import connections
 
 
 # ==================================================================================================================== #
-# Función para verificar la existencia de "t_team"                                                                     #
+# Función para verificar la existencia de "id_team" en "t_team"                                                        #
 # ==================================================================================================================== #
 def check_id_team():
     id_team_avaible = 0
@@ -12,7 +12,7 @@ def check_id_team():
         # Generar id_team
         id_team_temp = randint(1000, 1000000)
         # Buscar si el ID generado aleatoriamente existe en la "t_team"
-        query = f'''SELECT id_team FROM team
+        query = f'''SELECT id_team FROM teams
                     WHERE id_team =  {id_team_temp}'''
 
         # "id_team_exists" es una lista con una tupla que contiene el id_team
@@ -26,7 +26,7 @@ def check_id_team():
             break
 
     return id_team_avaible
-# END --------- Función para verificar la existencia de "t_team" ===================================================== #
+# END --------- Función para verificar la existencia de "id_team" en "t_team" ======================================== #
 # ==================================================================================================================== #
 
 
@@ -38,7 +38,7 @@ def check_name_team(name_team, id_league, home_or_away):
     id_team = 0
 
     # Buscar si el ID generado aleatoriamente existe en la "t_team"
-    query = f'''SELECT name_team FROM team
+    query = f'''SELECT name_team FROM teams
                 WHERE name_team =  "{name_team}"'''
 
     # "id_name_exists" es una lista con una tupla que contiene el name_team
@@ -51,25 +51,46 @@ def check_name_team(name_team, id_league, home_or_away):
     if len(id_name_exists) == 0:
         # Evaluar sí el ID generado "id_team_temp", existe o no en "t_team"
         id_team = check_id_team()
-        team_id_team = id_team
+        teams_id_team = id_team
 
         # Enviar data de home a "t_team"
         print(f'Sending data to "analysis_basketball.team" for {home_or_away}.')
-        connections.conn_db_table_team(id_team, name_team)
+        connections.conn_db_table_teams(id_team, name_team)
 
-        # Enviar data a "t_team_has_leagues"
-        print(f'Sending data to "analysis_basketball.team_has_leagues" for {home_or_away}.')
-        connections.conn_db_table_team_has_leagues(team_id_team, leagues_id_league)
+        # Enviar data a "t_teams_has_leagues"
+        print(f'Sending data to "analysis_basketball.teams_has_leagues" for {home_or_away}.')
+        connections.conn_db_table_teams_has_leagues(teams_id_team, leagues_id_league)
 
     else:
         print(f'El quipo {name_team} ya esta relacionado en "t_teams"')
 
-        # Buscar el ID "id_team" en "t_team" de "name_team"
-        query = f'''SELECT id_team FROM team
-                    WHERE name_team =  "{name_team}"'''
-        team_id_team = connections.select_row(query)[0][0]
+        # Buscar sí existe en "teams_has_leagues" el registro de
+        # "leagues_id_league = liga actual" y
+        # "teams_id_team = id_team del equipo que si existe (id_name_exists). Equipo actual"
+        query = f'''SELECT * 
+                    FROM teams_has_leagues
+                    WHERE leagues_id_league = {id_league} AND teams_id_team = 
+                    (
+                        SELECT id_team FROM teams
+                        WHERE name_team = '{id_name_exists[0][0]}'
+                    );'''
 
-    return team_id_team
+        # "exists_id_teams_has_leagues" es una lista con una tupla que contiene la existencia o no
+        # del registro en "teams_has_leagues" del "team actual con liga actual"
+        exists_id_teams_has_leagues = connections.select_row(query)
+
+        # Buscar el ID "id_team" en "t_team" de "name_team"
+        # para posteriormente, guardar este valor en la tabla unión "team_has_matches".
+        query = f'''SELECT id_team FROM teams
+                    WHERE name_team =  "{name_team}"'''
+        teams_id_team = connections.select_row(query)[0][0]
+
+        if len(exists_id_teams_has_leagues) == 0:
+            # Enviar data a "t_teams_has_leagues"
+            print(f'Sending data to "analysis_basketball.teams_has_leagues" for {home_or_away}.')
+            connections.conn_db_table_teams_has_leagues(teams_id_team, leagues_id_league)
+
+    return teams_id_team
 
 # END --------- Función para verificar la existencia de un equipo en "t_team" ======================================== #
 # ==================================================================================================================== #

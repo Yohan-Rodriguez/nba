@@ -5,7 +5,7 @@ use analysis_basketball_2;
 # ----------------------------------  
 
 # ----------------------------------  
-# DROP SCHEMA analysis_basketball_2;
+# DROP SCHEMA analysis_basketball;
 # ----------------------------------  
 
 # ----------------------------------  
@@ -14,5 +14,23 @@ use analysis_basketball_2;
 
 # ----------------------------------  
 # DELETE FROM leagues
-# WHERE id_league = 513;
+# WHERE id_league = 479;
 # ----------------------------------  
+
+
+# ----------------------------------------------------------------------------------------------  
+# Eliminar resgistros de una tabala aplicando consicional--------------------------------------- 
+# DELETE teams
+# FROM teams
+# WHERE id_team IN (35059, 188010, 282684, 591619, 727679, 778563, 811987, 959604);
+# ----------------------------------------------------------------------------------------------  
+
+
+# ----------------------------------------------------------------------------------------------  
+# Eliminar resgistros en una tabala unión aplicando consicional----------------------------------  
+# DELETE teams_has_leagues
+# FROM teams_has_leagues
+# JOIN teams ON teams_has_leagues.teams_id_team = teams.id_team
+# WHERE teams.id_team IN (35059, 188010, 282684, 591619, 727679, 778563, 811987, 959604);
+# ----------------------------------------------------------------------------------------------
+

@@ -1,0 +1,34 @@
+Guardar id_league
+
+Recore todos los partidos de la liga	
+
+	Repetir para home y away:
+		
+		Generar id_match
+	
+		Verificar existencia de  name_team en t_teams.
+
+			No Existe:
+			Guardar name_team en t_teams
+			guardar teams_has_leagues. (team_id_team - leagues_id_league)
+		
+			Existe:
+			Verificar que la referencia team-league exista o no dentro teams_has_leagues
+		
+				Existe:
+				pass
+
+				No existe:
+				Guardar teams_has_leagues. (team_id_team - leagues_id_league)					
+	
+		Exista o no name_tame, se genera team_id_team ↑
+	
+		Guardar match
+				
+		Guardar teams_has_matches (teams_id_team - match_id_match)
+
+
+
+
+
+
