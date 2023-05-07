@@ -79,5 +79,3 @@ def prepare_data(current_id_league, list_match_temp, date_match, i_1, i_2, i_3, 
     except Exception as e:
         # print Exception
         print(f'Exception in PREPARAR Y ENVIAR LA DATA A LA DB.\n{e}')
-
-    return name_home, name_away, date_match

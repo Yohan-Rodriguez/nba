@@ -1,6 +1,13 @@
-
+1) No guardar información de ligas con partidos viejos
+3) Limpiar todas la variables cada 3000 partidos por el problemo con el garbage collector.
+3) Examinar bien las exeptciones y la forma de guardar en t_errors
 2) Estudiar estructura de las páginas de las ligas por paises. 
 3) Diseñar el formato de mostrar las estadísticas de un partido en vivo. 
 4) Diseñar estructura de la actualización diaria del historia.
 
 7) Generalizar las funciones de connections.py. Tengo cóidgo repetido.
+
+
+
+FIFA Wolrd Cup: Eliminar link de la DB. La copa no ha iniciado
+Argentina Super -20: Eliminar. Solo tiene 3 partidos de febrero

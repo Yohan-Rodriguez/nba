@@ -1,39 +1,94 @@
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import links
 import textwrap
 import time
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 import check_db_and_controllers.check_data_in_db as ck
 from conn import connections
-import links
-from check_db_and_controllers import css_verification
 import re
 import prepare_and_sent_data as psd
+
 
 # ==================================================================================================================== #
 # OPEN BROWSER                                                                                                         #
 # ==================================================================================================================== #
 def conn_web():
-    website = 'https://www.sofascore.com/basketball'
     options = webdriver.ChromeOptions()
     options.binary_location = 'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
     driver_path = 'drivers\chromedriver.exe'
     driver_path = "..\drivers\chromedriver.exe"
     driver = webdriver.Chrome(options=options, executable_path=driver_path)
-
     driver.maximize_window()
-    driver.get(website)
+
+    def search_css_buttons(list_css):
+        for search_css in list_css:
+            try:
+                if driver.find_element(By.CSS_SELECTOR, search_css).is_displayed():
+                    break
+
+            except Exception as e:
+                # Si se iteró sobre el último elemento y generó exception también,
+                # Se genera una exception intencional
+                if search_css == list_css[-1]:
+                    raise Exception('CSS_SELECTOR NO ENCONTRADO. X-X-X-X-X-X-X.')
+
+                print(f'Buscando css button correcto{e}')
+                pass
+
+        return search_css
+
+    def search_selectors_css_b_previously():
+
+        list_selectors_css_button_previously = [
+            '#__next > main > div.sc-hLBbgP.dRtNhU.sc-836c558d-0.dTLyjH > div.fresnel-container.fresnel-greaterThanOrEqual-mdMin > div > div.sc-hLBbgP.sc-eDvSVe.gjJmZQ.fEHohf.sc-836c558d-1.eDNgWX > div.sc-hLBbgP.fSpQRs.sc-836c558d-2.kBACDz > div:nth-child(5) > div > div.sc-csuSiG.ikkoci > div > div > div.sc-hLBbgP.sYIUR > div > div.sc-hLBbgP.sc-eDvSVe.fcWLie.ilXvf > div:nth-child(1) > button',
+            '#__next > main > div.sc-hLBbgP.dRtNhU.sc-836c558d-0.dTLyjH > div.fresnel-container.fresnel-greaterThanOrEqual-mdMin > div > div.sc-hLBbgP.sc-eDvSVe.gjJmZQ.fEHohf.sc-836c558d-1.eDNgWX > div.sc-hLBbgP.fSpQRs.sc-836c558d-2.kBACDz > div:nth-child(6) > div > div.sc-csuSiG.ikkoci > div > div > div.sc-hLBbgP.sYIUR > div > div.sc-hLBbgP.sc-eDvSVe.fcWLie.ilXvf > div:nth-child(1) > button',
+            '#__next > main > div.sc-hLBbgP.dRtNhU.sc-836c558d-0.dTLyjH > div.fresnel-container.fresnel-greaterThanOrEqual-mdMin > div > div.sc-hLBbgP.sc-eDvSVe.gjJmZQ.fEHohf.sc-836c558d-1.eDNgWX > div.sc-hLBbgP.fSpQRs.sc-836c558d-2.kBACDz > div:nth-child(5) > div > div > div.sc-hLBbgP.sc-eDvSVe.gjJmZQ.fEHohf > div.sc-hLBbgP.sYIUR > div > div.sc-hLBbgP.sc-eDvSVe.fcWLie.ilXvf > div:nth-child(1) > button',
+            ]
+
+        search_css = search_css_buttons(list_selectors_css_button_previously)
+
+        return search_css
+
+    def search_selectors_css_b_next():
+
+        list_selectors_css_button_next = [
+            '#__next > main > div.sc-hLBbgP.dRtNhU.sc-836c558d-0.dTLyjH > div.fresnel-container.fresnel-greaterThanOrEqual-mdMin > div > div.sc-hLBbgP.sc-eDvSVe.gjJmZQ.fEHohf.sc-836c558d-1.eDNgWX > div.sc-hLBbgP.fSpQRs.sc-836c558d-2.kBACDz > div:nth-child(5) > div > div.sc-csuSiG.ikkoci > div > div > div.sc-hLBbgP.sYIUR > div > div.sc-hLBbgP.sc-eDvSVe.fcWLie.ilXvf > div:nth-child(2) > button',
+            '#__next > main > div.sc-hLBbgP.dRtNhU.sc-836c558d-0.dTLyjH > div.fresnel-container.fresnel-greaterThanOrEqual-mdMin > div > div.sc-hLBbgP.sc-eDvSVe.gjJmZQ.fEHohf.sc-836c558d-1.eDNgWX > div.sc-hLBbgP.fSpQRs.sc-836c558d-2.kBACDz > div:nth-child(6) > div > div.sc-csuSiG.ikkoci > div > div > div.sc-hLBbgP.sYIUR > div > div.sc-hLBbgP.sc-eDvSVe.fcWLie.ilXvf > div:nth-child(2) > button',
+            '#__next > main > div.sc-hLBbgP.dRtNhU.sc-836c558d-0.dTLyjH > div.fresnel-container.fresnel-greaterThanOrEqual-mdMin > div > div.sc-hLBbgP.sc-eDvSVe.gjJmZQ.fEHohf.sc-836c558d-1.eDNgWX > div.sc-hLBbgP.fSpQRs.sc-836c558d-2.kBACDz > div:nth-child(5) > div > div > div.sc-hLBbgP.sc-eDvSVe.gjJmZQ.fEHohf > div.sc-hLBbgP.sYIUR > div > div.sc-hLBbgP.sc-eDvSVe.fcWLie.ilXvf > div:nth-child(2) > button',
+            ]
+
+        search_css = search_css_buttons(list_selectors_css_button_next)
+
+        return search_css
+
+    def search_selectors_css_matches():
+
+        list_selectors_css_matches = [
+            '#__next > main > div.sc-hLBbgP.dRtNhU.sc-836c558d-0.dTLyjH > div.fresnel-container.fresnel-greaterThanOrEqual-mdMin > div > div.sc-hLBbgP.sc-eDvSVe.gjJmZQ.fEHohf.sc-836c558d-1.eDNgWX > div.sc-hLBbgP.fSpQRs.sc-836c558d-2.kBACDz > div:nth-child(5) > div > div.sc-csuSiG.ikkoci > div > div > div.sc-hLBbgP.sYIUR',
+            '#__next > main > div.sc-hLBbgP.dRtNhU.sc-836c558d-0.dTLyjH > div.fresnel-container.fresnel-greaterThanOrEqual-mdMin > div > div.sc-hLBbgP.sc-eDvSVe.gjJmZQ.fEHohf.sc-836c558d-1.eDNgWX > div.sc-hLBbgP.fSpQRs.sc-836c558d-2.kBACDz > div:nth-child(6) > div > div.sc-csuSiG.ikkoci > div > div > div.sc-hLBbgP.sYIUR',
+            '#__next > main > div.sc-hLBbgP.dRtNhU.sc-836c558d-0.dTLyjH > div.fresnel-container.fresnel-greaterThanOrEqual-mdMin > div > div.sc-hLBbgP.sc-eDvSVe.gjJmZQ.fEHohf.sc-836c558d-1.eDNgWX > div.sc-hLBbgP.fSpQRs.sc-836c558d-2.kBACDz > div:nth-child(5) > div > div > div.sc-hLBbgP.sc-eDvSVe.gjJmZQ.fEHohf > div.sc-hLBbgP.sYIUR',
+            ]
+
+        search_css = search_css_buttons(list_selectors_css_matches)
+
+        return search_css
 
     # ================================================================================================================ #
-    # ACCESS LINKS LEAGUES                                                                                             #
+    # GET ALL'S LINKS LEAGUES                                                                                          #
     # ================================================================================================================ #
-    # Top Leagues (xpath_league es el xplath de la etiqueta "<div>" que contiene varias etiquetas "<a>" dentro de ella):
-    xpath_league = driver.find_element(By.XPATH, '//*[@id="__next"]/main/div[1]/div[1]/div[1]/div[3]/div[2]')
+    # sentencia sql para traer los links de la tabla "links_leagues"
+    query = '''SELECT link_league 
+               FROM links_leagues'''
 
-    # Extraer los atributos href de todas las etiquetas "<a>".
-    list_links_leagues = links.search_links(xpath_league)
+    # [(link_league_1,), (link_league_2,), (link_league_3,), (link_league_4,), ..., link_league_n,]
+    list_tuple_links_leagues = connections.select_row(query, database='analysis_basketball_test')
+    # END --------- GET ALL'S LINKS LEAGUES                                                                        # # #
+    # ================================================================================================================ #
 
     # Eliminar la "fiba-world-cup" porque no ha iniciado aún
-    list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/international/fiba-world-cup/441')
+    # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/international/fiba-world-cup/441')
     # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/usa/nba/132')
     # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/international/euroleague/138')
     # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/greece/a1/304')
@@ -41,11 +96,8 @@ def conn_web():
     # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/spain/liga-acb/264')
     # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/international/admiralbet-aba-league/235')
     # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/brazil/nbb/1562')
-
     # eurocup tiene unos xpath que aún no he definido
-    list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/international/eurocup/141')
-    # END --------- ACCESS LINKS LEAGUES                                                                           # # #
-    # ================================================================================================================ #
+    # list_links_leagues.remove('https://www.sofascore.com/tournament/basketball/international/eurocup/141')
 
     # ================================================================================================================ #
     # FUNCTION search_button()                                                                                         #
@@ -76,20 +128,19 @@ def conn_web():
 
     # END --------- FUNCTION search_button()                                                                           #
     # ================================================================================================================ #
+    # Posicion de la url dentro de la tupla "links_by_country"
+    change_league = 0
 
     # ================================================================================================================ #
     # ACCESS NEW LEAGUES                                                                                               #
     # ================================================================================================================ #
-    # Parámetro para cambiar de liga
-    change_league = 0
+    for links_by_country in list_tuple_links_leagues:
 
-    # Bucle para recorrer todas las ligas
-    while True:
         # ============================================================================================================ #
-        # NOMBRE DE LA LIGA Y ENVIAR DATA A LA TABLE "basketball.leagues"                                              #
+        # NOMBRE DE LA LIGA                                                                                            #
         # ============================================================================================================ #
         # Parámetro para recargar la página para cada liga (link en la lista "list_links_leagues").
-        new_tab_open = list_links_leagues[change_league]
+        new_tab_open = links_by_country[change_league]
         # Ej: new_tab_open = "https://www.sofascore.com/tournament/basketball/international/euroleague/138" :: str
 
         # List a partir de la url de la liga.
@@ -100,48 +151,56 @@ def conn_web():
         new_name_league = f"{new_tab_open_split[5]} - {new_tab_open_split[6]}"
         # Ej: new_name_league = "international - euroleague"
         print(new_name_league)
+        # END --------- NOMBRE DE LA LIGA                                                                          # # #
+        # ============================================================================================================ #
 
-        # Enviar nombre de liga a la tabla "analysis_basketball.leagues".
         try:
+            # driver.maximize_window()
+            # Recargar la página
+            driver.get(new_tab_open)
+            # driver.get(f'{new_tab_open}')
+
+            # ============================================================================================================ #
+            # BUSCAR CSS_SELECTOR DE LOS BOTONES                                                                     #
+            # ============================================================================================================ #
+            def search_css_correct_button(which_button):
+                while True:
+                    try:
+                        if which_button == 0:
+                            print('which_button = 0')
+                            # Selector CSS del botón PREVIOUS"
+                            # selector_button :: str
+                            selector_button = search_selectors_css_b_previously()
+
+                        elif which_button == 1:
+                            print('which_button = 1')
+                            # Selector CSS del botón NEXT"
+                            # selector_button_previous :: str
+                            selector_button = search_selectors_css_b_next()
+
+                        button = search_button(selector_button)
+                        driver.execute_script("arguments[0].click();", button)
+
+                        break
+
+                    except Exception:
+                        raise Exception('Cargando data a la tabla "t_errors".')
+
+                return selector_button
+
+            # list_selectors_buttons = [button_previous, button_next] :: str
+            list_selectors_buttons = []
+            for selec_which_button in range(2):
+                # 0 para button_previous y 1 para button_next:
+                list_selectors_buttons.append(search_css_correct_button(selec_which_button))
+
+            # Enviar nombre de liga a la tabla "analysis_basketball.leagues".
             ck.check_name_league(new_name_league)
-            query = f'''SELECT id_league FROM leagues 
+            query = f'''SELECT id_league FROM leagues
                             WHERE name_league = "{ck.list_names_leagues[-1]}"'''
             current_id_league = connections.select_row(query)[0][0]
-
-            def identify_css_league(identifier, i_name_league, add_identifier):
-                identifier = identifier
-                if new_name_league.__contains__(f'{i_name_league}'):
-                    identifier += add_identifier
-
-                return identifier
-
-            # "flag_brazil = 0" para ligas top diferentes a "Brazil - NBB"
-            # "flag_brazil = 1" para la liga top "Brazil - NBB"
-            flag_brazil = identify_css_league(identifier=0, i_name_league='brazil - nbb', add_identifier=1)
-
-            # "identifier_league = 5" para ligas top diferentes a "eurocop"
-            # "identifier_league = 6" para la liga top "eurocop"
-            identifier_league = identify_css_league(identifier=5, i_name_league='international - eurocup', add_identifier=1)
-            # END --------- NOMBRE DE LA LIGA Y ENVIAR DATA A LA TABLE "basketball.leagues"                            # # #
+            # END --------- BUSCAR CSS_SELECTOR DE LOS BOTONES                                                # # #
             # ============================================================================================================ #
-
-            # Recargar la página
-            driver.get(f'{new_tab_open}')
-
-            # controladores del "button_previous"
-            # Clics iniciales en "button.previous" cada vez que se recarga la página inicial
-
-            # Selector CSS del button.previous
-            # selector_button_previous :: str
-            selector_button_previous = css_verification.get_selectors_css_top_leagues(identifier_league)[2 + flag_brazil]
-            button_previous = search_button(selector_button_previous)
-            driver.execute_script("arguments[0].click();", button_previous)
-
-            # Selector CSS del botón NEXT"
-            # selector_css_next :: str
-            selector_css_next = css_verification.get_selectors_css_top_leagues(identifier_league)[4 + flag_brazil]
-            button_next = search_button(selector_css_next)
-            driver.execute_script("arguments[0].click();", button_next)
 
             count_initial_clicks = 0
             # Número de clics sobre "button.previous" durante la ejecución del programa
@@ -152,9 +211,8 @@ def conn_web():
             # Bandera para ser usada en caso de que el historial se termine y salir del 'while "RELOAD PAGES"'
             flag_end_history = False
 
-            # Bucle encargado de recargar la página cada "count_match_clicks" clics en button.previous en "POST INITIAL"
+            # Bucle encargado de recargar la página cada "n" "count_match_clicks" clics en button.previous en "POST INITIAL"
             while True:
-
                 # ======================================================================================================== #
                 # CLICK ON PREVIOUS (INITIAL)                                                                              #
                 # ======================================================================================================== #
@@ -167,8 +225,8 @@ def conn_web():
 
                     while count_initial_clicks_temp < count_initial_clicks:
                         # Parámetro del botón previously
-                        # tuple_path[2] = xpath_button_previous :: str
-                        button_previous = search_button(selector_button_previous)
+                        # list_selectors_buttons = [button_previous, button_next] :: str
+                        button_previous = search_button(list_selectors_buttons[0])
 
                         try:
                             if button_previous.is_displayed():
@@ -176,6 +234,7 @@ def conn_web():
                                 driver.execute_script("arguments[0].click();", button_previous)
 
                                 print(f'Button: {count_initial_clicks_temp}')
+
                                 count_initial_clicks_temp += 1
 
                         except Exception:
@@ -204,7 +263,7 @@ def conn_web():
                     try:
                         # Selector CSS de la sección "DIV 1 to 10 MACTHES"
                         # selector_section_10_matches :: str
-                        selector_section_10_matches = css_verification.get_selectors_css_top_leagues(identifier_league)[0 + flag_brazil]
+                        selector_section_10_matches = search_selectors_css_matches()
 
                         # Lista a partir del string con saltos de línea obtenido con ".text".
                         # Cada salto de línea representa un nuevo elemento en la lista (splitlines())
@@ -262,24 +321,22 @@ def conn_web():
                                     if list_match_temp[-12].isdigit():
                                         # Si hubo overtime
                                         over_time = True
-                                        home_away_date = psd.prepare_data(current_id_league, list_match_temp, date_match,
-                                                                          -1, -2, -4, -5, -6, -7, -9, -10, -11, -12, -13,
-                                                                          -14, over_time)
+                                        psd.prepare_data(current_id_league, list_match_temp, date_match,
+                                                         -1, -2, -4, -5, -6, -7, -9, -10, -11, -12, -13,
+                                                         -14, over_time)
 
                                     elif list_match_temp[-10].isdigit():
                                         # No hubo overtime
                                         # ... ['FT', 'PAOK', 'Promitheas', 23', '24', '17', '17', '21', '21', '15', '21', '81', '78']
-                                        home_away_date = psd.prepare_data(current_id_league, list_match_temp, date_match, -1,
-                                                                          -2, -3, -4, -5, -6, -7, -8, -9, -10, -11,
-                                                                          -12, over_time)
+                                        psd.prepare_data(current_id_league, list_match_temp, date_match, -1,
+                                                         -2, -3, -4, -5, -6, -7, -8, -9, -10, -11,
+                                                         -12, over_time)
                     # ================================================================================================ #
                     # EXCEPTIONS CONTROL                                                                               #
                     # ================================================================================================ #
                     except Exception as e:
                         print(f'Exception in for match (10, 0, -1)\n{e}')
-
-
-                        continue
+                        pass
                     # END --------- EXCEPTIONS CONTROL                                                             # # #
                     # ================================================================================================ #
 
@@ -294,7 +351,7 @@ def conn_web():
 
                     try:
                         # Parámetro del botón previously
-                        button_previous = search_button(selector_button_previous)
+                        button_previous = search_button(list_selectors_buttons[0])
 
                         # Dar clic en "button.previous" por medio de un script de js
                         driver.execute_script("arguments[0].click();", button_previous)
@@ -304,7 +361,7 @@ def conn_web():
                     except Exception:
                         try:
                             # Parámetro del botón previously
-                            button_previous = search_button(selector_button_previous)
+                            button_previous = search_button(list_selectors_buttons[0])
 
                             # Dar clic en "button.previous" por medio de un script de js
                             driver.execute_script("arguments[0].click();", button_previous)
@@ -327,7 +384,6 @@ def conn_web():
 
             print(textwrap.dedent('''Final historial de partidos de la liga actual.
                                              Iniciar nueva DATA COLLECTION con la siguiente liga.'''))
-
             # ============================================================================================================ #
             # END --------- RELOAD PAGES                                                                                   #
             # ============================================================================================================ #
@@ -345,27 +401,21 @@ def conn_web():
 
                 except Exception:
                     print(f'NO DATA FOR BD_error X+X+X+X+X+X+X+X+X+X+X+X\n{e}')
-                    continue
+                    pass
 
-                continue
+                pass
 
-            continue
+            pass
 
-        print(str(len(list_links_leagues) - 1), str(change_league))
-        # Cargar nueva liga
-        if (len(list_links_leagues) - 1) > change_league:
-            change_league += 1
-            print('Cambio de liga.')
+        print('Cambio de liga.')
 
-        else:
-            print('Fin de las ligas.')
-            break
-        # ================================================================================================================ #
-        # END --------- ACCESS LEAGUES                                                                                     #
-        # ================================================================================================================ #
-
+    print('Fin de las ligas.')
     # Cerrar navegador
     driver.quit()
+    # ================================================================================================================ #
+    # END --------- NEW ACCESS LEAGUES                                                                                 #
+    # ================================================================================================================ #
+
 # END --------- OPEN BROWSER                                                                                       # # #
 # ==================================================================================================================== #
 

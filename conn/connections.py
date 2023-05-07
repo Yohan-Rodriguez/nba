@@ -7,7 +7,7 @@ import mysql.connector
 host_default = 'localhost'
 user_default = 'root'
 pass_default = 'admin'
-database_default = 'analysis_basketball'
+database_default = 'analysis_basketball_test_2'
 # END: Atributos                                                                                                   # # #
 # ==================================================================================================================== #
 
@@ -34,6 +34,9 @@ def conn_to_database(database, host=host_default, user=user_default, password=pa
 def select_row(query, database=database_default):
     conn = conn_to_database(database=database)
     conn[1].execute(query)
+
+    # "my_result" es una lista de tulpas.
+    # Cada tupla contiene las columnas (los datos) de cada registro
     my_result = conn[1].fetchall()
 
     return my_result
