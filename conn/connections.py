@@ -29,27 +29,12 @@ def conn_to_database(database, host=host_default, user=user_default, password=pa
 
 
 # ==================================================================================================================== #
-# READ                                                                                                                 #
-# ==================================================================================================================== #
-def select_row(query, database=database_default):
-    conn = conn_to_database(database=database)
-    conn[1].execute(query)
-
-    # "my_result" es una lista de tulpas.
-    # Cada tupla contiene las columnas (los datos) de cada registro
-    my_result = conn[1].fetchall()
-
-    return my_result
-# END --------- READ                                                                                               # # #
-# ==================================================================================================================== #
-
-
-# ==================================================================================================================== #
 # INSERT                                                                                                               #
 # ==================================================================================================================== #
 def insert_row (query, database=database_default):
     conn = conn_to_database(database=database)
     conn[1].execute(query)
+    del query
     conn[0].commit()
 # END --------- INSERT                                                                                             # # #
 # ==================================================================================================================== #
@@ -62,6 +47,7 @@ def conn_db_table_leagues(id_league, name_league):
     query = f'''INSERT INTO leagues (id_league, name_league) 
                 VALUES ({id_league}, '{name_league}')'''
     insert_row(query=query)
+    del query
 
     print('Executed TABLE "leagues".')
 # END --------- TABLE "analysis_basketball.leagues"                                                                 # # #
@@ -74,6 +60,7 @@ def conn_db_table_leagues(id_league, name_league):
 def conn_db_table_teams(id_team, name_team):
     query = f'''INSERT INTO teams (id_team, name_team) VALUES ({id_team}, '{name_team}')'''
     insert_row(query=query)
+    del query
 
     print('Executed TABLE "teams".')
 # END --------- TABLE "analysis_basketball.teams"                                                                  # # #
@@ -87,6 +74,7 @@ def conn_db_table_teams_has_leagues(teams_id_team, leagues_id_league):
     query = f'''INSERT INTO teams_has_leagues (teams_id_team, leagues_id_league) VALUES ({teams_id_team}, 
     '{leagues_id_league}')'''
     insert_row(query=query)
+    del query
 
     print('Executed TABLE "teams_has_leagues".')
 # END --------- TABLE "analysis_basketball.teams"                                                                  # # #
@@ -103,6 +91,8 @@ def conn_db_table_matches(id_match, date_match, is_home, total_points, q_1, q_2,
                 {is_win})'''
     insert_row(query=query)
 
+    del query
+
     print('Executed TABLE "matches".')
 # END --------- TABLE "analysis_basketball.teams"                                                                  # # #
 # ==================================================================================================================== #
@@ -115,6 +105,8 @@ def conn_db_table_teams_has_matches(teams_id_team, matches_id_match):
     query = f'''INSERT INTO teams_has_matches (teams_id_team, matches_id_match) VALUES ({teams_id_team}, 
                 '{matches_id_match}')'''
     insert_row(query=query)
+
+    del query
 
     print('Executed TABLE "teams_has_matches".')
 # END --------- TABLE "analysis_basketball.teams"                                                                  # # #
@@ -146,7 +138,10 @@ def conn_insert_table_statistics(name_team, avg_gral, mdn_gral, max_gral, min_gr
     {min_point_q3_a}, {avg_q4_a}, {mdn_q4_a}, {max_point_q4_a}, {min_point_q4_a})'''
 
     insert_row(query, database=database_default)
+
     print('Executed INSERT INTO TABLE "statistics" successfully!.')
+
+    del query
 # END --------- SEN DATA TABLE STATISTICS                                                                          # # #
 # # ================================================================================================================== #
 
@@ -159,6 +154,8 @@ def connection_db_t_errors(name_league):
     insert_row(query=query)
 
     print('Executed TABLE "t_errors" X+X+X+X+X+X+XX+X -----------')
+
+    del query
 # ==================================================================================================================== #
 # END --------- TABLE "analysis_basketball.errors"                                                                 # # #
 # ==================================================================================================================== #

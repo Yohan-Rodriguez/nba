@@ -1,17 +1,17 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from conn import connections
-import links
-from check_db_and_controllers import css_verification
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from check_db_and_controllers.css_verification import selector_all_leagues as sel_all_leagues
+from conn.connections import insert_row as conn_insert_row
+import history_links.links as links
 
 
 def search_link():
     website = 'https://www.sofascore.com/basketball'
     options = webdriver.ChromeOptions()
     options.binary_location = 'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
-    driver_path = 'drivers\chromedriver.exe'
+    driver_path = '../drivers/chromedriver.exe'
     driver_path = "..\drivers\chromedriver.exe"
     driver = webdriver.Chrome(options=options, executable_path=driver_path)
     driver.maximize_window(website)
@@ -30,7 +30,7 @@ def search_link():
     for i_menu in range(1, 127, 2):
         try:
             # Obtener los selectores css y el xpath a usar por cada país
-            selector_css_button_and_name_country = css_verification.selector_all_leagues(i_menu, temp_xpath_links)
+            selector_css_button_and_name_country = sel_all_leagues(i_menu, temp_xpath_links)
 
             # # Trae el selector, de cada iteración, correspondiente a
             # # el nombre del país y el div donde están los links de las ligas.
@@ -51,13 +51,13 @@ def search_link():
             xpath_links_found = driver.find_element(By.XPATH, xpath_ligueas_current)
 
             # Extraer los atributos href de todas las etiquetas "<a>".
-            list_links_leagues_country = links.search_links(xpath_links_found)
+            list_links_leagues_country = links(xpath_links_found)
             temp_xpath_links += 1
 
             for send_link in list_links_leagues_country[:-1]:
                 query = (f"INSERT INTO links_leagues (link_league) VALUE ('{send_link}')")
                 print('Sending data to "analysis_basketball.links_leagues".')
-                connections.insert_row(query)
+                conn_insert_row(query)
                 print('Executed TABLE "LINKS_LEAGUES".')
 
         except Exception as e:

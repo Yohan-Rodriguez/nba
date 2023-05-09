@@ -53,4 +53,10 @@ FROM teams
 JOIN teams_has_matches ON teams.id_team = teams_has_matches.teams_id_team
 WHERE teams_has_matches.teams_id_team = 35059 OR 188010 OR 282684 OR 591619 OR 727679 OR 778563 OR 811987 OR 959604;
 
+DELETE teams_has_leagues
+FROM teams_has_leagues
+JOIN teams ON teams_has_leagues.teams_id_team = teams.id_team
+WHERE teams.id_team IN (35059, 188010, 282684, 591619, 727679, 778563, 811987, 959604);
+
+
 

@@ -1,4 +1,5 @@
 USE analysis_basketball_test;
+USE analysis_basketball_test_2;
 USE analysis_basketball_2;
 USE analysis_basketball;
 
@@ -11,13 +12,15 @@ SELECT * FROM teams_has_leagues;
 SELECT * FROM teams_has_matches
 LIMIT 0, 10000;
 SELECT * FROM t_errors;
+SELECT * FROM links_leagues;
+# WHERE link_league = 'https://www.sofascore.com/tournament/basketball/argentina/super-20/10701';
 SELECT * FROM statistics;
 
 SELECT * FROM teams
-WHERE name = 'Olympi';
+WHERE id_team = 811872;
 
-SELECT id_team FROM team
-WHERE id_team =  125;
+SELECT * FROM teams_has_matches 
+WHERE teams_has_matches.matches_id_match =  171666;
 
 
 INSERT INTO team (id_team, name_team) VALUES (111, 'WART');
@@ -61,8 +64,18 @@ WHERE leagues_id_league = 412 AND team_id_team = (
     );
     
 SELECT *
-FROM team;
+FROM teams
+WHERE name_team = 'Tinguiririca';
 
 SELECT COUNT(is_win)
 FROM matches
 WHERE is_win = 0;
+
+SELECT * 
+FROM leagues
+JOIN t_errors ON leagues.name_league = t_errors.league_error;
+
+SELECT * 
+FROM teams
+JOIN teams_has_leagues ON teams.id_team = teams_has_leagues.teams_id_team
+WHERE teams_has_leagues.leagues_id_league IN (250, 933);

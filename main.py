@@ -2,18 +2,17 @@
 # Press Mayús+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
-import load_history
-import load_historytest
-import calculate_statistics
-import search_links_leagues
-import tests
+# from history_match.tests import catch_match
+from history_match.load_history import catch_match
+from statistics_dir.calculate_statistics import get_data
+from history_links.search_links_leagues import search_link
 
 
 # ==================================================================================================================== #
 # LINKS LEAGUES                                                                                                        #
 # ==================================================================================================================== #
 def load_links_leagues():
-    search_links_leagues.search_link()
+    search_link()
 # END --------- LINKS LEAGUES                                                                                      # # #
 # ==================================================================================================================== #
 
@@ -23,7 +22,7 @@ def load_links_leagues():
 # ==================================================================================================================== #
 def conn_main():
     # open_browser.catch_match()
-    load_history.catch_match()
+    catch_match()
 # END --------- HISTORY                                                                                            # # #
 # ==================================================================================================================== #
 
@@ -36,7 +35,7 @@ def see_statistics():
     list_id_leagues = [441, 485, 546, 705, 756, 819]
 
     # open_browser.catch_match()
-    calculate_statistics.get_data(list_id_leagues)
+    get_data(list_id_leagues)
 # END --------- STATISTICS                                                                                         # # #
 # ==================================================================================================================== #
 

@@ -1,5 +1,6 @@
 import pandas as pd
-from conn import connections
+from conn.connections import conn_insert_table_statistics as conn_insert_statistics
+from history_match.functions_shared import select_row as fs_select_row
 
 
 def calc_statistics_quarters(df_data_teams, i_name, i_q, i_ishome):
@@ -147,7 +148,7 @@ def calc_statistics(result_data):
 
     for i_sent in range(-12, len(list_statistics_teams)-12, 12):
 
-        connections.conn_insert_table_statistics(list_statistics_teams[i_sent + 12], list_statistics_teams[i_sent + 23][0],
+        conn_insert_statistics(list_statistics_teams[i_sent + 12], list_statistics_teams[i_sent + 23][0],
                                                  list_statistics_teams[i_sent+23][1], list_statistics_teams[i_sent+23][2],
                                                  list_statistics_teams[i_sent+23][3], list_statistics_teams[i_sent+22][0],
                                                  list_statistics_teams[i_sent+22][1], list_statistics_teams[i_sent+22][2],
@@ -175,6 +176,7 @@ def calc_statistics(result_data):
 # END --------- CALCULATE STATISTICS                                                                               # # #
 # # ================================================================================================================== #
 
+
 # ==================================================================================================================== #
 # GET DATA TABLE TEAMS                                                                                                 #
 # ==================================================================================================================== #
@@ -186,7 +188,8 @@ def get_data(list_id_leagues):
                     FROM teams
                     WHERE leagues_id_league = {i_id_leagues}
                     ORDER BY name ASC'''
-        result_data = connections.select_row(query)
+        result_data = fs_select_row(query)
+        del query
 
         calc_statistics(result_data)
 # END --------- ET DATA TABLE TEAMS                                                                                # # #
