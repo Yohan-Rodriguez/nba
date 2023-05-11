@@ -1,16 +1,16 @@
 USE analysis_basketball_test;
 USE analysis_basketball_test_2;
-USE analysis_basketball_2;
-USE analysis_basketball;
+USE colombia_test;
+USE test_mis_marcadores;
 
 SELECT * FROM teams
-LIMIT 0, 10000;
+LIMIT 0, 40000;
 SELECT * FROM matches
-LIMIT 0, 10000;
+LIMIT 0, 40000;
 SELECT * FROM leagues;
 SELECT * FROM teams_has_leagues;
 SELECT * FROM teams_has_matches
-LIMIT 0, 10000;
+LIMIT 0, 40000;
 SELECT * FROM t_errors;
 SELECT * FROM links_leagues;
 # WHERE link_league = 'https://www.sofascore.com/tournament/basketball/argentina/super-20/10701';

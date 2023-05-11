@@ -22,7 +22,6 @@ def prepare_data(current_id_league, list_match_temp, date_match, i_1, i_2, i_3, 
             conn_db_teams_has_matches(teams_id_team, id_match)
 
         # END --------- Función para enviar los datos a "t_teams" y "t_matches" ============== #
-
         name_home = list_match_temp[i_12]
         name_away = list_match_temp[i_11]
         points_final_away = int(list_match_temp[i_1])
@@ -40,9 +39,6 @@ def prepare_data(current_id_league, list_match_temp, date_match, i_1, i_2, i_3, 
         is_win_home = False
         if points_final_home > points_final_away:
             is_win_home = True
-        else:
-            pass
-
         # ==================================================================================== #
         # SENDING DATA TO BD                                                                   #
         # ==================================================================================== #
@@ -60,7 +56,7 @@ def prepare_data(current_id_league, list_match_temp, date_match, i_1, i_2, i_3, 
                 # Sí el equipo no existe en t_teams, se guarda dentro del scope de la función
                 # "ck.check_name_team"
                 teams_id_team = ck_name(list_names_teams[i_send_data_t_team], current_id_league,
-                                                   home_or_away=i_send_data_t_team)
+                                        home_or_away=i_send_data_t_team)
 
                 if i_send_data_t_team == 0:
                     # Enviar data de home a "t_matches"
@@ -70,7 +66,7 @@ def prepare_data(current_id_league, list_match_temp, date_match, i_1, i_2, i_3, 
                 elif i_send_data_t_team == 1:
                     # Enviar data de away a "t_team" y a "t_matches"
                     send_data_to_teams_and_matchs(teams_id_team, id_match, date_match, False, points_final_away, q_1A,
-                                                  q_2A, q_3A, q_4A, over_time, is_win_home, home_or_away=i_send_data_t_team)
+                                                  q_2A, q_3A, q_4A, over_time, not is_win_home, home_or_away=i_send_data_t_team)
 
             print('Completed Finish match -----------------------------')
 

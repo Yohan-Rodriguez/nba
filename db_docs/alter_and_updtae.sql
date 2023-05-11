@@ -1,5 +1,13 @@
 ALTER TABLE t_errors ADD description_error VARCHAR(200);
 
 UPDATE t_errors 
-SET description_error = 'Repeat league'
-WHERE id_error = 5;
+SET league_error = 'tunisia - national-a-league'
+WHERE id_error = 164;
+
+
+INSERT INTO leagues (id_league, name_league)
+VALUES (123, 'international - euroleague');
+
+ALTER TABLE t_errors
+MODIFY league_error VARCHAR(60);
+

@@ -11,8 +11,7 @@ from history_match.prepare_and_sent_data import prepare_data as psd
 from history_match.css_xpath_list import search_css as cxl
 
 
-def conn_web(count_league):
-    count_league =count_league
+def conn_web():
     # ================================================================================================================ #
     # FUNCTION search_button()                                                                                         #
     # ================================================================================================================ #
@@ -80,13 +79,13 @@ def conn_web(count_league):
 
     # [(link_league_1,), (link_league_2,), (link_league_3,), (link_league_4,), ..., link_league_n,]
     list_tuple_links_leagues = fs_select_row(query, database='analysis_basketball_test')
-    del query
     # END --------- GET ALL'S LINKS LEAGUES                                                                        # # #
     # ================================================================================================================ #
 
     # ================================================================================================================ #
     # ACCESS TO EACH LEAGUE                                                                                            #
     # ================================================================================================================ #
+    count_league = 270   # Borrar y volver a censar Bulgari Cup
     count_match = 1
     # Iterar sobre la lista de tuplas obtenida con los link de las ligas.
     for links_by_country in list_tuple_links_leagues[count_league:]:
@@ -157,7 +156,6 @@ def conn_web(count_league):
             query = f'''SELECT id_league FROM leagues
                             WHERE name_league = "{ck_list_name_league[-1]}"'''
             current_id_league = fs_select_row(query)[0][0]
-            del query
             # END --------- ENVIAR NOMBRE DE LA LIGA A LA TABLEA "league"                                          # # #
             # ======================================================================================================== #
 
@@ -310,32 +308,25 @@ def conn_web(count_league):
                                     # 2 posiciones del puntaje del Over Time
                                     # 2 positones de puntajes finales (resultado_temp[-12])
 
-                                    try:
-                                        if list_match_temp[14].isdigit():
-                                            # Si hubo overtime
-                                            over_time = True
+                                    if list_match_temp[-12].isdigit():
+                                        # Si hubo overtime
+                                        over_time = True
 
-                                            if len(list_match_temp) > 15:
-                                                del list_match_temp[15:]
+                                        # if len(list_match_temp) > 15:
+                                        #     del list_match_temp[15:]
 
-                                            psd(current_id_league, list_match_temp, date_match, -1, -2, -4, -5, -6, -7, -9,
-                                                -10, -11, -12, -13, -14, over_time)
+                                        psd(current_id_league, list_match_temp, date_match, -1, -2, -4, -5, -6, -7, -9,
+                                            -10, -11, -12, -13, -14, over_time)
 
-                                    except Exception:
-                                        # Sí el arreglo tiene más de 15 posiciones [0:14]
-                                        pass
+                                    elif list_match_temp[-10].isdigit():
+                                        # No hubo overtime
+                                        # if len(list_match_temp) > 13:
+                                        #     del list_match_temp[13:]
 
-                                    finally:
-                                        if list_match_temp[12].isdigit():
-                                            # No hubo overtime
-                                            if len(list_match_temp) > 13:
-                                                del list_match_temp[13:]
+                                        # ... ['FT', 'PAOK', 'Promitheas', 23', '24', '17', '17', '21', '21', '15', '21', '81', '78']
+                                        psd(current_id_league, list_match_temp, date_match, -1, -2, -3, -4, -5, -6, -7,
+                                            -8, -9, -10, -11, -12, over_time)
 
-                                            # ... ['FT', 'PAOK', 'Promitheas', 23', '24', '17', '17', '21', '21', '15', '21', '81', '78']
-                                            psd(current_id_league, list_match_temp, date_match, -1, -2, -3, -4, -5, -6, -7,
-                                                -8, -9, -10, -11, -12, over_time)
-
-                                    print(f'Partido número {count_match} antes de borrar el almacenamiento de la memoria')
                                     count_match += 1
                                 # END --------- CHECK IF THE MATCH IS OVER AND SEND DATA TO DB's                   # # #
                                 # ==================================================================================== #
@@ -422,10 +413,9 @@ def conn_web(count_league):
             pass
 
         finally:
-            print('\n\nCambio de liga.')
-            count_league += 1
+            print(f'\nNúmero de partidos hasta ahora: {count_match}\nCambio de liga.')
 
-            if count_match > 3000:
+            if count_match > 1700:
                 break
 
     # ================================================================================================================ #
@@ -435,20 +425,14 @@ def conn_web(count_league):
     # Cerrar navegador
     driver.quit()
 
-    return count_league
-
 
 # ==================================================================================================================== #
 # CAPTAR 70 PARTIDOS Y RECARGAR PÁGINA                                                                                 #
 # ==================================================================================================================== #
 def catch_match():
     try:
-        count_league = 0
-        while True:
-            # Llamada de la función
-            count_league_temp = conn_web(count_league)
-            count_league += count_league_temp
-
+        # Llamada de la función
+        conn_web()
 
     except Exception as e:
         print(f'X*X*X*X* EXCEPTION X*X*X*X*\n\tEND Error FATAL.\n\tFIN DEL PROGRAMA CON ERRORES\n{e}')

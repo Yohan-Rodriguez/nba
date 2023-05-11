@@ -1,12 +1,25 @@
 USE ANALYSIS_BASKETBALL_2;
+
 # ----------------------------------------------------------------------------------------------------------
-# CANTIDAD DE EQUIPOS POR LIGA -----------------------------------------------------------------------------
-SELECT leagues.name_league AS NAME_LEAGUE, leagues.id_league AS ID_LEAGUE, COUNT(teams.id_team) AS AMOUNT_TEAM
+# CANTIDAD DE EQUIPOS Y PARTIDOS POR LIGA -----------------------------------------------------------------------------
+SELECT leagues.name_league AS NAME_LEAGUE, leagues.id_league AS ID_LEAGUE, COUNT(teams.id_team) AS AMOUNT_TEAM,
+    (
+        SELECT COUNT(matches.id_match) 
+        FROM matches 
+        JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match 
+        WHERE teams_has_matches.teams_id_team IN (
+            SELECT teams_has_leagues.teams_id_team 
+            FROM teams_has_leagues 
+            WHERE teams_has_leagues.leagues_id_league = leagues.id_league
+        )
+    ) AS AMOUNT_MATCH
 FROM leagues
-INNER JOIN teams_has_leagues AS t_l ON leagues.id_league =  t_l.leagues_id_league
+INNER JOIN teams_has_leagues AS t_l ON leagues.id_league = t_l.leagues_id_league
 INNER JOIN teams ON teams.id_team = t_l.teams_id_team
-GROUP BY leagues.id_league;
+GROUP BY leagues.id_league
+ORDER BY AMOUNT_TEAM, AMOUNT_MATCH ASC;
 # ----------------------------------------------------------------------------------------------------------
+
 
 # ----------------------------------------------------------------------------------------------------------
 # NOMBRE DE LOS EQUIPOS EN UNA LIGA EN PARTÍCULAR ----------------------------------------------------------
@@ -17,46 +30,48 @@ INNER JOIN teams ON teams.id_team = teams_has_leagues.teams_id_team
 WHERE leagues.name_league = 'brazil - nbb';
 # ----------------------------------------------------------------------------------------------------------
 
-# ----------------------------------------------------------------------------------------------------------
-SELECT * FROM team_has_leagues
-WHERE teams_id_team = 262035;
-# ----------------------------------------------------------------------------------------------------------
 
-# ----------------------------------------------------------------------------------------------------------
-# ??????????????????????????????????????????????? ----------------------------------------------------------
-SELECT teams.id_team AS ID_TEAM, teams.name_team AS NAME_TEAM
+
+# ----------------------------------------------------------------------------------------------  
+# Seleccionar valores nulos --------------------------------------------------------------------  
+SELECT * 
+FROM matches
+LEFT JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
+WHERE teams_has_matches.matches_id_match IS NULL;
+
+
+SELECT * 
 FROM teams
 LEFT JOIN teams_has_leagues ON teams.id_team = teams_has_leagues.teams_id_team
 WHERE teams_has_leagues.teams_id_team IS NULL;
-# ----------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------  
 
 
-SELECT team.id_team
-FROM team
-FULL JOIN team_has_leagues ON team; 
 
-SELECT  *
+# ----------------------------------------------------------------------------------------------  
+# Seleccionar equipos de una liga seleccionada -------------------------------------------------  
+SELECT teams.id_team AS ID_TEAM, teams.name_team AS NAME_TEAM 
 FROM teams
-WHERE name_team = 'Helios';
+JOIN teams_has_leagues ON teams.id_team = teams_has_leagues.teams_id_team
+WHERE teams_has_leagues.leagues_id_league = 8368;
+# ----------------------------------------------------------------------------------------------  
 
-SELECT teams.name_team AS TEAM, COUNT(teams_has_leagues.leagues_id_league) AS AMOUNT_LEAGUE
+
+
+# ----------------------------------------------------------------------------------------------  
+# Seleccionar equipos de una liga seleccionada --------------------------------------------------  
+SELECT COUNT(*) 
+FROM matches
+JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
+WHERE teams_has_matches.teams_id_team IN (964404, 963889, 948686, 941421, 936972, 803257, 689413, 686698, 541953, 407566, 290275, 250272, 13285, 5000);	
+# ----------------------------------------------------------------------------------------------  
+
+
+
+
+
+SELECT teams.name_team AS NAME_TEAM, COUNT(teams_has_leagues.leagues_id_league) AS AMOUNT_LEAGUE
 FROM teams
-INNER JOIN teams_has_leagues ON teams.id_team = teams_has_leagues.teams_id_team
-GROUP BY TEAM
+JOIN teams_has_leagues ON teams.id_team = teams_has_leagues.teams_id_team
+GROUP BY NAME_TEAM
 HAVING AMOUNT_LEAGUE > 0;
-
-DELETE FROM teams_has_matches
-WHERE teams_id_team = 35059 OR 188010 OR 282684 OR 591619 OR 727679 OR 778563 OR 811987 OR 959604;
-
-DELETE teams
-FROM teams
-JOIN teams_has_matches ON teams.id_team = teams_has_matches.teams_id_team
-WHERE teams_has_matches.teams_id_team = 35059 OR 188010 OR 282684 OR 591619 OR 727679 OR 778563 OR 811987 OR 959604;
-
-DELETE teams_has_leagues
-FROM teams_has_leagues
-JOIN teams ON teams_has_leagues.teams_id_team = teams.id_team
-WHERE teams.id_team IN (35059, 188010, 282684, 591619, 727679, 778563, 811987, 959604);
-
-
-

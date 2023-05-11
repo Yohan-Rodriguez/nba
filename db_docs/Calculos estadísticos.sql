@@ -2,8 +2,11 @@ USE analysis_basketball;
 
 # AVERAGE: --------------------------------------------
 SELECT AVG(q_1) AS Average
-FROM teams 
-WHERE name = "76ers" AND is_home = 1;
+FROM matches 
+JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
+JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
+AND is_home = 0
+WHERE teams.name_team = 'Breogán';
 # ------------------------------------------------------
 
 # MÁXIMO: ----------------------------------------------

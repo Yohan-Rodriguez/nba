@@ -3,9 +3,10 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
 # from history_match.tests import catch_match
-from history_match.load_history import catch_match
+from history_match.old_load_history import catch_match
 from statistics_dir.calculate_statistics import get_data
 from history_links.search_links_leagues import search_link
+from history_match.load_history_mis_marcadores import cath_data as load_data
 
 
 # ==================================================================================================================== #
@@ -22,7 +23,23 @@ def load_links_leagues():
 # ==================================================================================================================== #
 def conn_main():
     # open_browser.catch_match()
-    catch_match()
+    # catch_match()
+    list_links_leagues = [
+                          # 'https://www.flashscore.co/baloncesto/espana/liga-endesa/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/argentina/lnb/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/austria/superliga/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/dinamarca/basketligaen/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/eslovenia/liga-nova-kbm/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/finlandia/korisliiga/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/letonia/lbl/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/nueva-zelanda/nbl/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/polonia/energa-basket-liga/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/puerto-rico/bsn/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/republica-checa/nbl/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/rumania/divizia-a/resultados/'
+    ]
+    load_data(list_links_leagues)
+
 # END --------- HISTORY                                                                                            # # #
 # ==================================================================================================================== #
 
@@ -55,3 +72,4 @@ conn_main()
 # ==================================================================================================================== #
 
 # tests.testing()
+
