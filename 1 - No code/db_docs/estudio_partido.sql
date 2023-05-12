@@ -1,4 +1,5 @@
 USE analysis_basketball_test_2;
+USE test_mis_marcadores;
 
 
 # ----------------------------------------------------------------------------------------------  
@@ -14,25 +15,27 @@ ORDER BY name_league;
 SELECT teams.id_team AS ID_TEAM, teams.name_team AS NAME_TEAM
 FROM teams
 JOIN teams_has_leagues ON teams.id_team = teams_has_leagues.teams_id_team
-WHERE teams_has_leagues.leagues_id_league = 4257
+WHERE teams_has_leagues.leagues_id_league = 2559
 ORDER BY teams.name_team ASC;
 # ---------------------------------------------------------------------------------------------- 
 
+SET @home = 'Argentino';
+SET @away = 'Atenas';
 
 
 # AVERAGE, DEPENDIENDO SI ES LOCAL O VISITANTE, POR EQUIPO: ------------------------------------
 SELECT teams.name_team AS NAME_TEAM, 	   
 	   AVG(q_1) AS AVG_Q1, 
        AVG(q_2) AS AVG_Q2, 
-       AVG(q_3) AS AVG_Q2, 
+       AVG(q_3) AS AVG_Q3, 
        AVG(q_4) AS AVG_Q4, 
        AVG(total_points) AS AVG_TOTAL,
        matches.is_home AS IS_HOME
 FROM matches 
 JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
 JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
-WHERE (teams.name_team = 'Knicks' AND is_home = 1)
-   OR (teams.name_team = 'Heat' AND is_home = 0)
+WHERE (teams.name_team = @home AND is_home = 1)
+   OR (teams.name_team = @away AND is_home = 0)
 GROUP BY NAME_TEAM, IS_HOME;
 # ------------------------------------------------------
 
@@ -46,8 +49,8 @@ SELECT teams.name_team AS NAME_TEAM,
 FROM matches 
 JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
 JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
-WHERE (teams.name_team = 'Knicks' AND is_home = 1)
-   OR (teams.name_team = 'Heat' AND is_home = 0)
+WHERE (teams.name_team = @home AND is_home = 1)
+   OR (teams.name_team = @away AND is_home = 0)
 GROUP BY NAME_TEAM;
 
 # MÍNIMO:-----------------------------------------------
@@ -60,8 +63,8 @@ SELECT teams.name_team AS NAME_TEAM,
 FROM matches 
 JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
 JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
-WHERE (teams.name_team = 'Knicks' AND is_home = 1)
-   OR (teams.name_team = 'Heat' AND is_home = 0)
+WHERE (teams.name_team = @home AND is_home = 1)
+   OR (teams.name_team = @away AND is_home = 0)
 GROUP BY NAME_TEAM;
 # ------------------------------------------------------
 
@@ -72,14 +75,14 @@ SELECT q_4 AS Home_Q_4
 FROM matches
 JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
 JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
-WHERE name_team = 'Knicks' AND matches.is_home = 1
+WHERE name_team = @home AND matches.is_home = 1
 ORDER BY Q_4 ASC;
 
 SELECT q_4 AS Away_Q_4
 FROM matches
 JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
 JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
-WHERE name_team = 'Heat' AND matches.is_home = 0
+WHERE name_team = @away AND matches.is_home = 0
 ORDER BY Q_4 ASC;
 # ----------------------------------------------------------------------------------------------  
 
@@ -146,3 +149,98 @@ WHERE row_num_q1 IN (FLOOR((total_rows_q1 + 1) / 2), CEIL((total_rows_q1 + 1) / 
 # DELETE VISTA: ----------------------------------------
 DROP VIEW view_q1;
 # ------------------------------------------------------
+
+
+
+
+
+
+# ----------------------------------------------------------------------------------------------  
+# El equipo SI supera su media del Q_4 CUANDO: -------------------------------------------------
+SET @home = 'Philadelphia 76ers';
+SET @away = 'Boston Celtics';
+
+
+# ----------------------------------------------------------------------------------------------  
+# AVG(Q_4): ------------------------------------------------------------------------------------
+SELECT AVG(q_4) AS AVG_Q4
+				FROM matches 
+				JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
+				JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
+				WHERE (teams.name_team = @home AND is_home = 1);
+
+# ----------------------------------------------------------------------------------------------  
+# Puntos en Q_1 > AVG(Q_4): --------------------------------------------------------------------
+SELECT q_1 AS Q1_HOME_MAYOR_A_AVG_Q4_HOME
+FROM matches
+JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
+JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
+WHERE teams.name_team = @home 
+  AND matches.q_4 > (
+					SELECT AVG(q_4) AS AVG_Q4
+					FROM matches 
+					JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
+					JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
+					WHERE (teams.name_team = @home AND is_home = 1)
+					GROUP BY teams.name_team)
+ORDER BY q_1 ASC;
+
+# ----------------------------------------------------------------------------------------------  
+# Puntos en Q_2 > AVG(Q_4): --------------------------------------------------------------------
+SELECT q_2 AS Q2_HOME_MAYOR_A_AVG_Q4_HOME
+FROM matches
+JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
+JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
+WHERE teams.name_team = @home 
+  AND matches.q_4 > (
+					SELECT AVG(q_4) AS AVG_Q4
+					FROM matches 
+					JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
+					JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
+					WHERE (teams.name_team = @home AND is_home = 1)
+					GROUP BY teams.name_team)
+ORDER BY q_2 ASC;
+
+# ----------------------------------------------------------------------------------------------  
+# Puntos en Q_3 > AVG(Q_4): --------------------------------------------------------------------
+SELECT q_3 AS Q3_HOME_MAYOR_A_AVG_Q4_HOME
+FROM matches
+JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
+JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
+WHERE teams.name_team = @home 
+  AND matches.q_4 > (
+					SELECT AVG(q_4) AS AVG_Q4
+					FROM matches 
+					JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
+					JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
+					WHERE (teams.name_team = @home AND is_home = 1)
+					GROUP BY teams.name_team)
+ORDER BY q_3 ASC;
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ----------------------------------------------------------------------------------------------  
+# DIFERENCIA DE PUNTOS EN Q_3 ES POSITIVA Y ES > AVG(Q_4): -------------------------------------
+SELECT q_3 AS Q_3_HOME
+FROM matches
+JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
+JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
+WHERE (teams.name_team = @home AND is_home = 1)
+;#ORDER BY Q_3_HOME;
+
+SELECT q_3 AS Q_3_AWAY
+FROM matches
+JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
+JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
+WHERE (teams.name_team = @away AND is_home = 0)
+;#ORDER BY Q_3_AWAY;

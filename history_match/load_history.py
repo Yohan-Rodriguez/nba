@@ -64,7 +64,7 @@ def cath_data(list_links_leagues):
                 flag_emergency_button -= 1
 
         return button_previous
-    # END ---------                                                                            #
+    # END ---------                                                                                                    #
     # ================================================================================================================ #
 
     count_league = 0
@@ -120,7 +120,7 @@ def cath_data(list_links_leagues):
 
         # Obtener id (analysis_basketball.leagues.id_league) de la liga actual
         query = f'''SELECT id_league FROM leagues
-                        WHERE name_league = "{ck_list_name_league[-1]}"'''
+                    WHERE name_league = "{ck_list_name_league[-1]}"'''
         current_id_league = fs_select_row(query)[0][0]
         # END --------- ENVIAR NOMBRE DE LA LIGA A LA TABLEA "league"                                              # # #
         # ============================================================================================================ #

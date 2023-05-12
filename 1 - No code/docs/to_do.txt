@@ -1,0 +1,8 @@
+1) Investigar sobre el error fatal de Garbage Colletor.
+2) Usar la tabla "links_leagues".
+3) Diseñar el formato de mostrar las estadísticas de un partido en vivo. 
+4) Diseñar estructura de la actualización diaria del historia.
+5) Análisis estadístico.
+6) Aplicar aprendiaje autonomo automático.
+7) Front-End.
+

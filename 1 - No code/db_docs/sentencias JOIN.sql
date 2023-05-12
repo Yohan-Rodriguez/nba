@@ -1,6 +1,6 @@
-USE ANALYSIS_BASKETBALL_2;
+USE analysis_basketball;
 
-# ----------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------
 # CANTIDAD DE EQUIPOS Y PARTIDOS POR LIGA -----------------------------------------------------------------------------
 SELECT leagues.name_league AS NAME_LEAGUE, leagues.id_league AS ID_LEAGUE, COUNT(teams.id_team) AS AMOUNT_TEAM,
     (

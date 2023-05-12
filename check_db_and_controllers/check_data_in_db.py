@@ -161,3 +161,31 @@ def check_id_match():
     return id_match_avaible
 # END --------- Función para verificar la existencia de "t_team" ===================================================== #
 # ==================================================================================================================== #
+
+
+# ==================================================================================================================== #
+# Función para verificar la existencia de id_statistics en "t_statistics"                                              #
+# ==================================================================================================================== #
+# Esta función es llamada en un archivo externo (prepare_and_data_send_data.py)
+def check_id_statistics():
+    id_statistics_avaible = 0
+
+    while True:
+        id_statistics_temp = randint(1000, 1000000)
+        # Buscar si el ID generado aleatoriamente existe en la "t_team"
+        query = f'''SELECT id_statistics FROM statistics
+                    WHERE id_statistics =  {id_statistics_temp}'''
+
+        # "id_team_exists" es una lista con una tupla que contiene el id_team
+        id_statistics_exists = fs_select_row(query)
+        # id_team_exists es:
+        # id_team_exists = [(id_team,)] :: (id_team_exists[0][0] :: INT), o
+        # id_team_exists = []. (No existe "id_team" con valor "id_team_temp")
+
+        if len(id_statistics_exists) == 0:
+            id_statistics_avaible = id_statistics_temp
+            break
+
+    return id_statistics_avaible
+# END --------- Función para verificar la existencia de id_statistics en "t_statistics"=============================== #
+# ==================================================================================================================== #

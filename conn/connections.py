@@ -109,26 +109,23 @@ def conn_db_table_teams_has_matches(teams_id_team, matches_id_match):
 # ==================================================================================================================== #
 # SEN DATA TABLE STATISTICS                                                                                            #
 # ==================================================================================================================== #
-def conn_insert_table_statistics(name_team, avg_gral, mdn_gral, max_gral, min_gral, avg_home, mdn_home,
-                                 max_point_h, min_point_h, avg_away, mdn_away, max_away, min_away, avg_q1_h,
-                                 mdn_q1_h, max_point_q1_h, min_point_q1_h, avg_q2_h, mdn_q2_h, max_point_q2_h,
-                                 min_point_q2_h, avg_q3_h, mdn_q3_h, max_point_q3_h, min_point_q3_h, avg_q4_h,
-                                 mdn_q4_h, max_point_q4_h, min_point_q4_h, avg_q1_a, mdn_q1_a, max_point_q1_a,
-                                 min_point_q1_a, avg_q2_a, mdn_q2_a, max_point_q2_a, min_point_q2_a, avg_q3_a,
-                                 mdn_q3_a, max_point_q3_a, min_point_q3_a, avg_q4_a, mdn_q4_a, max_point_q4_a,
-                                 min_point_q4_a):
+def conn_insert_table_statistics(id_statistics, id_teams_id_team, id_leagues_id_league, avg_gral, mdn_gral, max_gral,
+                                 min_gral, avg_h, mdn_h, max_h, min_h, avg_a, mdn_a, max_a, min_a, avg_q1_h, mdn_q1_h,
+                                 max_q1_h, min_q1_h, avg_q2_h, mdn_q2_h, max_q2_h, min_q2_h, avg_q3_h, mdn_q3_h, max_q3_h,
+                                 min_q3_h, avg_q4_h, mdn_q4_h, max_q4_h, min_q4_h, avg_q1_a, mdn_q1_a, max_q1_a, min_q1_a,
+                                 avg_q2_a, mdn_q2_a, max_q2_a, min_q2_a, avg_q3_a, mdn_q3_a, max_q3_a, min_q3_a, avg_q4_a,
+                                 mdn_q4_a, max_q4_a, min_q4_a):
 
-    query = f'''INSERT INTO statistics (name_team, avg_gral, mdn_gral, max_gral, min_gral, avg_home, mdn_home, 
-    max_point_h, min_point_h, avg_away, mdn_away, max_away, min_away, avg_q1_h, mdn_q1_h, max_point_q1_h, min_point_q1_h, 
-    avg_q2_h, mdn_q2_h, max_point_q2_h, min_point_q2_h, avg_q3_h, mdn_q3_h, max_point_q3_h, min_point_q3_h, avg_q4_h, 
-    mdn_q4_h, max_point_q4_h, min_point_q4_h, avg_q1_a, mdn_q1_a, max_point_q1_a, min_point_q1_a, avg_q2_a, mdn_q2_a, 
-    max_point_q2_a, min_point_q2_a, avg_q3_a, mdn_q3_a, max_point_q3_a, min_point_q3_a, avg_q4_a, mdn_q4_a, max_point_q4_a,
-    min_point_q4_a) VALUES ('{name_team}', {avg_gral}, {mdn_gral}, {max_gral}, {min_gral}, {avg_home}, {mdn_home}, 
-    {max_point_h}, {min_point_h}, {avg_away}, {mdn_away}, {max_away}, {min_away}, {avg_q1_h}, {mdn_q1_h}, {max_point_q1_h}, 
-    {min_point_q1_h}, {avg_q2_h}, {mdn_q2_h}, {max_point_q2_h}, {min_point_q2_h}, {avg_q3_h}, {mdn_q3_h}, {max_point_q3_h}, 
-    {min_point_q3_h}, {avg_q4_h}, {mdn_q4_h}, {max_point_q4_h}, {min_point_q4_h}, {avg_q1_a}, {mdn_q1_a}, {max_point_q1_a}, 
-    {min_point_q1_a}, {avg_q2_a}, {mdn_q2_a}, {max_point_q2_a}, {min_point_q2_a}, {avg_q3_a}, {mdn_q3_a}, {max_point_q3_a}, 
-    {min_point_q3_a}, {avg_q4_a}, {mdn_q4_a}, {max_point_q4_a}, {min_point_q4_a})'''
+    query = f'''INSERT INTO statistics (id_statistics, id_teams_id_team, id_leagues_id_league, avg_gral, mdn_gral, max_gral, 
+    min_gral, avg_h, mdn_h, max_h, min_h, avg_a, mdn_a, max_a, min_a, avg_q1_h, mdn_q1_h, max_q1_h, min_q1_h, avg_q2_h, 
+    mdn_q2_h, max_q2_h, min_q2_h, avg_q3_h, mdn_q3_h, max_q3_h, min_q3_h, avg_q4_h, mdn_q4_h, max_q4_h, min_q4_h, avg_q1_a, 
+    mdn_q1_a, max_q1_a, min_q1_a, avg_q2_a, mdn_q2_a, max_q2_a, min_q2_a, avg_q3_a, mdn_q3_a, max_q3_a, min_q3_a, avg_q4_a, 
+    mdn_q4_a, max_q4_a, min_q4_a) VALUES ({id_statistics}, {id_teams_id_team}, {id_leagues_id_league}, {avg_gral}, 
+    {mdn_gral}, {max_gral}, {min_gral}, {avg_h}, {mdn_h}, {max_h}, {min_h}, {avg_a}, {mdn_a}, {max_a}, {min_a}, {avg_q1_h}, 
+    {mdn_q1_h}, {max_q1_h}, {min_q1_h}, {avg_q2_h}, {mdn_q2_h}, {max_q2_h}, {min_q2_h}, {avg_q3_h}, {mdn_q3_h}, {max_q3_h}, 
+    {min_q3_h}, {avg_q4_h}, {mdn_q4_h}, {max_q4_h}, {min_q4_h}, {avg_q1_a}, {mdn_q1_a}, {max_q1_a}, {min_q1_a},  {avg_q2_a}, 
+    {mdn_q2_a}, {max_q2_a}, {min_q2_a}, {avg_q3_a}, {mdn_q3_a}, {max_q3_a}, {min_q3_a}, {avg_q4_a}, 
+    {mdn_q4_a}, {max_q4_a}, {min_q4_a})'''
 
     insert_row(query, database=database_default)
 

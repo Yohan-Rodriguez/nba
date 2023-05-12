@@ -2,11 +2,9 @@
 # Press Mayús+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
-# from history_match.tests import catch_match
-from history_match.old_load_history import catch_match
 from statistics_dir.calculate_statistics import get_data
 from history_links.search_links_leagues import search_link
-from history_match.load_history_mis_marcadores import cath_data as load_data
+from history_match.load_history import cath_data as load_data
 
 
 # ==================================================================================================================== #
@@ -49,7 +47,7 @@ def conn_main():
 # ==================================================================================================================== #
 def see_statistics():
     # Solicitud de información a la tabla "analysis_basketball".teams con el id de liga dado
-    list_id_leagues = [441, 485, 546, 705, 756, 819]
+    list_id_leagues = [9862]
 
     # open_browser.catch_match()
     get_data(list_id_leagues)
@@ -63,11 +61,11 @@ def see_statistics():
 # # Guardar todos los links de las ligas
 # load_links_leagues()
 
-# Generar historial de equipos para guardar en la base de datos
-conn_main()
+# # Generar historial de equipos para guardar en la base de datos
+# conn_main()
 
-# # Generar estadísticas de los equipos
-# see_statistics()
+# Generar estadísticas de los equipos
+see_statistics()
 # END --------- FUNCTIONS CALLS                                                                                    # # #
 # ==================================================================================================================== #
 
