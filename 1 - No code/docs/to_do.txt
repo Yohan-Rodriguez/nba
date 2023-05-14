@@ -5,4 +5,4 @@
 5) Análisis estadístico.
 6) Aplicar aprendiaje autonomo automático.
 7) Front-End.
-
+8) Investigar y aplicar el uso del modulo gc, del garbage collector, para la gestión de memoria en python.

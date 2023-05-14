@@ -2,7 +2,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from check_db_and_controllers.css_verification import selector_all_leagues as sel_all_leagues
 from conn.connections import insert_row as conn_insert_row
 import history_links.links as links
 

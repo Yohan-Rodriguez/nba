@@ -9,7 +9,6 @@ SELECT * FROM teams_has_leagues;
 SELECT * FROM teams_has_matches
 LIMIT 0, 40000;
 SELECT * FROM t_errors;
-SELECT * FROM links_leagues;
 SELECT * FROM statistics;
 
 SELECT * FROM teams

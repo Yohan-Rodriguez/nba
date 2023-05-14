@@ -8,7 +8,7 @@ from conn.connections import conn_db_table_matches as conn_db_matches
 from check_db_and_controllers.check_data_in_db import check_name_team as ck_name
 from check_db_and_controllers.check_data_in_db import check_name_league as ck_name_league
 from check_db_and_controllers.check_data_in_db import list_names_leagues as ck_list_name_league
-from history_match.functions_shared import select_row as fs_select_row
+from conn.functions_shared import select_row as fs_select_row
 
 
 # ================================================================================================================ #
@@ -78,15 +78,15 @@ def cath_data(list_links_leagues):
         # ============================================================================================================ #
         # Parámetro para recargar la página para cada liga (link en la tuple "links_by_country").
         new_tab_open = links_by_country
-        # Ej: new_tab_open = "https://www.sofascore.com/tournament/basketball/international/euroleague/138" :: str
+        # Ej: new_tab_open = "https://www.flashscore.co/baloncesto/italia/serie-a2/resultados/" :: str
 
         # List a partir de la url de la liga.
         new_tab_open_split = new_tab_open.split('/')
-        # Ej: new_tab_open = ['https', '','www.sofascore.com', 'tournament', 'basketball', 'international', 'euroleague', '138']
+        # Ej: new_tab_open = ['https', '','www.flashscore.co', 'baloncesto', 'italia', 'serie-a2', 'resultados']
 
         # Extracción del nombre de la url (de la lista "new_tab_open_split").
         new_name_league = f"{new_tab_open_split[4]} - {new_tab_open_split[5]}"
-        # Ej: new_name_league = "international - euroleague"
+        # Ej: new_name_league = "italia - serie-a2"
         print(new_name_league)
         # END --------- NOMBRE DE LA LIGA                                                                          # # #
         # ============================================================================================================ #

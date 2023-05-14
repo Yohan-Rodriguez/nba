@@ -7,7 +7,7 @@ import mysql.connector
 host_default = 'localhost'
 user_default = 'root'
 pass_default = 'admin'
-database_default = 'test_mis_marcadores'
+database_default = 'analysis_basketball'
 # END: Atributos                                                                                                   # # #
 # ==================================================================================================================== #
 
@@ -145,3 +145,6 @@ def connection_db_t_errors(name_league):
 # ==================================================================================================================== #
 # END --------- TABLE "analysis_basketball.errors"                                                                 # # #
 # ==================================================================================================================== #
+
+
+

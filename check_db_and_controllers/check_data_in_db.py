@@ -1,6 +1,6 @@
 from random import randint
 from conn.connections import conn_db_table_teams_has_leagues as conn_db_teams_has_leagues
-from history_match.functions_shared import select_row as fs_select_row
+from conn.functions_shared import select_row as fs_select_row
 from conn.connections import conn_db_table_leagues as conn_db_leagues
 from conn.connections import conn_db_table_teams as conn_db_teams
 
@@ -56,7 +56,7 @@ def check_name_team(name_team, id_league, home_or_away):
         teams_id_team = id_team
 
         # Enviar data de home a "t_team"
-        print(f'Sending data to "analysis_basketball.team" for {home_or_away}.')
+        print(f'Sending data to "analysis_basketball.teams" for {home_or_away}.')
         conn_db_teams(id_team, name_team)
 
         # Enviar data a "t_teams_has_leagues"

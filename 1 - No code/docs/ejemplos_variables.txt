@@ -63,5 +63,56 @@ list_data_match = ['10-05', 'Real Madrid', 'Partizan', '98', '94', '22', '23', '
 
 
 
+# El idex es de referencia. No hace parte del contenido de la variabole div_data;
+
+div_data = 
+0 ARGENTINA
+1 LNB - Playoffs
+2 Cuadro
+3 Tras la prórroga
+4 Riachuelo
+5 Instituto de Córdoba
+6 100
+7 97
+8 21
+9 19
+10 23
+11 14
+12 24
+13 32
+14 15
+15 18
+16 17
+17 14
+18 Finalizado
+19 Obras
+20 Gimnasia
+21 65
+22 69
+23 20
+24 18
+25 10
+26 14
+27 19
+28 15
+29 16
+30 22
+31 COLOMBIA
+32 LBP
+34 Finalizado
+35 Corsarios Cartagena
+36 Motilones del Norte
+37 45
+38 86
+39 9
+40 28
+41 6
+42 20
+43 15
+.
+.
+.
+.
+
 
 

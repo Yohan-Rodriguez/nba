@@ -1,4 +1,4 @@
-ALTER TABLE t_errors ADD description_error VARCHAR(200);
+ALTER TABLE leagues ADD link_league VARCHAR(150) NOT NULL;
 
 UPDATE t_errors 
 SET league_error = 'tunisia - national-a-league'

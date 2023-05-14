@@ -1,4 +1,4 @@
-USE test_mis_marcadores;
+USE analysis_basketball;
 
 
 # ----------------------------------  
@@ -14,7 +14,7 @@ USE test_mis_marcadores;
 # ----------------------------------  
 
 # ----------------------------------  
-# TRUNCATE leagues;
+# TRUNCATE statistics;
 # ----------------------------------  
 
 # ----------------------------------  

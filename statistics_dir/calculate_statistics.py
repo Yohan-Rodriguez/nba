@@ -1,6 +1,6 @@
 import pandas as pd
 from conn.connections import conn_insert_table_statistics as conn_insert_statistics
-from history_match.functions_shared import select_row as fs_select_row
+from conn.functions_shared import select_row as fs_select_row
 from check_db_and_controllers.check_data_in_db import check_id_statistics as check_id_statis
 
 
