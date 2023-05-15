@@ -11,12 +11,12 @@ from check_db_and_controllers.check_data_in_db import list_names_leagues as ck_l
 from conn.functions_shared import select_row as fs_select_row
 
 
-# ================================================================================================================ #
-# Función para enviar los datos a "t_teams" y "t_matches"                                                          #
-# ================================================================================================================ #
-def send_data_to_teams_and_matchs(teams_id_team, id_match, date_match, is_home,
-                                  total_points, q_1, q_2, q_3, q_4, over_time, is_win,
-                                  home_or_away):
+# ==================================================================================================================== #
+# Función para enviar los datos a "t_teams" y "t_matches"                                                              #
+# ==================================================================================================================== #
+def send_data_to_teams_and_matches(teams_id_team, id_match, date_match, is_home,
+                                   total_points, q_1, q_2, q_3, q_4, over_time, is_win,
+                                   home_or_away):
     # Enviar data a "t_matches"
     print(f'Sending data to "analysis_basketball.matches" for {home_or_away}.')
     conn_db_matches(id_match, date_match, is_home, total_points, q_1,
@@ -25,7 +25,7 @@ def send_data_to_teams_and_matchs(teams_id_team, id_match, date_match, is_home,
     # Enviar data a "t_teams_has_matches"
     print(f'Sending data to "analysis_basketball.teams_has_matches" for {home_or_away}.')
     conn_db_teams_has_matches(teams_id_team, id_match)
-# END --------- Función para enviar los datos a "t_teams" y "t_matches" ============== #
+# END --------- Función para enviar los datos a "t_teams" y "t_matches" ============================================== #
 
 
 def cath_data(list_links_leagues):
@@ -243,13 +243,13 @@ def cath_data(list_links_leagues):
 
                             if i_send_data_t_team == 0:
                                 # Enviar data de home a "t_matches"
-                                send_data_to_teams_and_matchs(teams_id_team, id_match, date_match, True, points_final_home, q_1H,
-                                                              q_2H, q_3H, q_4H, is_over_time, is_win_home, home_or_away=i_send_data_t_team)
+                                send_data_to_teams_and_matches(teams_id_team, id_match, date_match, True, points_final_home, q_1H,
+                                                               q_2H, q_3H, q_4H, is_over_time, is_win_home, home_or_away=i_send_data_t_team)
 
                             elif i_send_data_t_team == 1:
                                 # Enviar data de away a "t_team" y a "t_matches"
-                                send_data_to_teams_and_matchs(teams_id_team, id_match, date_match, False, points_final_away, q_1A,
-                                                              q_2A, q_3A, q_4A, is_over_time, not is_win_home, home_or_away=i_send_data_t_team)
+                                send_data_to_teams_and_matches(teams_id_team, id_match, date_match, False, points_final_away, q_1A,
+                                                               q_2A, q_3A, q_4A, is_over_time, not is_win_home, home_or_away=i_send_data_t_team)
 
                         print('Completed Finish match -----------------------------')
                         count_match += 1

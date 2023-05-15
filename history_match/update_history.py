@@ -1,5 +1,5 @@
 import time
-import re
+import unicodedata
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from check_db_and_controllers.check_data_in_db import check_id_match as ck_match
@@ -7,19 +7,16 @@ from conn.connections import conn_db_table_teams_has_matches as conn_db_teams_ha
 from conn.connections import conn_db_table_matches as conn_db_matches
 from check_db_and_controllers.check_data_in_db import check_name_team as ck_name
 from conn.functions_shared import select_row as fs_select_row
-import datetime
 
 
 # ================================================================================================================ #
 # Función para enviar los datos a "t_teams" y "t_matches"                                                          #
 # ================================================================================================================ #
-def send_data_to_teams_and_matchs(teams_id_team, id_match, date_match, is_home,
-                                  total_points, q_1, q_2, q_3, q_4, over_time, is_win,
-                                  home_or_away):
+def send_data_to_teams_and_matches(teams_id_team, id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4,
+                                   over_time, is_win, home_or_away):
     # Enviar data a "t_matches"
     print(f'Sending data to "analysis_basketball.matches" for {home_or_away}.')
-    conn_db_matches(id_match, date_match, is_home, total_points, q_1,
-                    q_2, q_3, q_4, over_time, is_win)
+    conn_db_matches(id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4, over_time, is_win)
 
     # Enviar data a "t_teams_has_matches"
     print(f'Sending data to "analysis_basketball.teams_has_matches" for {home_or_away}.')
@@ -53,8 +50,7 @@ def cath_data():
                 break
 
             except Exception:
-                print(
-                    f'Reintentando obtener XPATH de "Mostrar Más partidos".\nIntentos Restante: -{flag_emergency_button} s')
+                print(f'Reintentando obtener XPATH de "Mostrar Más partidos".\nIntentos Restante: -{flag_emergency_button} s')
                 time.sleep(2)
 
                 if flag_emergency_button <= 0:
@@ -67,6 +63,9 @@ def cath_data():
     # END --------- BUSCAR CSS_SELECTOR BUTTON                                                                         #
     # ================================================================================================================ #
 
+    # ================================================================================================================ #
+    # SEARCH DAY IN CALENDAR.                                                                                          #
+    # ================================================================================================================ #
     button = search_button('#live-table > div.filters > div.filters__group > div:nth-child(4) > div')
     driver.execute_script("arguments[0].click();", button)
     time.sleep(3)
@@ -76,7 +75,15 @@ def cath_data():
     driver.execute_script("arguments[0].click();", button_calendar)
     time.sleep(3)
     print('Click on button "CALENDAR"')
-    #
+
+    date_match_div = driver.find_element(By.CSS_SELECTOR, '#calendarMenu').text
+    # Ejemplo "date_match_div" = '14/05 DO'
+
+    # Ajustar formato de fecha según MySql (AÑO/MES/DÍA),
+    date_match = f'23/{date_match_div[3:5]}/{date_match_div[:2]}'
+    print(date_match)
+    # END --------- SEARCH DAY IN CALENDAR.                                                                            #
+    # ================================================================================================================ #
 
     # Obtener la data de todos los partidos cargados en el DIV
     try:
@@ -108,23 +115,23 @@ def cath_data():
     # ================================================================================================================ #
     # Iterar sobre "div_data" para extraer información de los partidos
     while True:
-        # Si temp_div llega al final de la lista "div_data", se termina las iteraciones ================================== #
+        # Si temp_div llega al final de la lista "div_data", se termina las iteraciones ============================== #
         if temp_div >= len(div_data):
             break
-        # ================================================================================================================ #
+        # ============================================================================================================ #
 
-        # ================================================================================================================ #
-        # VERIFICAR PATRON DE INFORMACIÓN: LIGA - PARTIDO.                                                                 #
-        # ================================================================================================================ #
+        # ============================================================================================================ #
+        # VERIFICAR PATRON DE INFORMACIÓN: LIGA - PARTIDO.                                                             #
+        # ============================================================================================================ #
         # Iterar sobre cada conjunto de datos que pertenecen a un solo parido.
-        # Los conjunots de datos de un solo partido se establecen dentro del siguiente while.
+        # Los conjuntos de datos de un solo partido se establecen dentro del siguiente while.
         while True:
-            # El patrón regular de inicio de un conjunto de datos de un partido esta dado por 6 o 3 posiciones:
+            # El patrón regular de inicio de un conjunto de datos de un partido está dado por 6 o 3 posiciones:
             # Ejemplo de 6 posiciones: ['AUSTRALIA', 'NBL1 North Women', 'Clasificación', 'Finalizado', 'Cairns F', 'Mackay Meteorettes F']
             # Ejemplo de 3 posiciones: ['Finalizado', 'Taurinos', 'Trotamundos']
             # Sí se cumple el patrón de 6 posiciones, indica grupo de partidos de una nueva liga.
-            # Sí se cumple el patrón de 3 posiciones, inidica que la iteración actual hace referencia de un partido de
-            # la liga que cumplió el patron inmediatamente aneterior, de 6 posiciones.
+            # Sí se cumple el patrón de 3 posiciones, indica que la iteración actual hace referencia de un partido de
+            # la liga que cumplió el patron inmediatamente anterior, de 6 posiciones.
             if all((isinstance(item, str) and not item.isdigit()) for item in div_data[temp_div:temp_div + 6]):
                 # Sí hay un cambio de liga, se carga el diccionario "dict_leagues_teams"
                 # con la información de la liga, y partidos de ella, anterior.
@@ -136,7 +143,8 @@ def cath_data():
 
                 # "name_country" es la posición "temp_div" actual de "div_data"
                 # Se realiza una limpieza sobre el nombre del país obtenido de la página web
-                name_country = div_data[temp_div].lower()
+                name_country = div_data[temp_div].replace(' ', '-').lower()
+                name_country = unicodedata.normalize('NFKD', name_country).encode('ASCII', 'ignore').decode('utf-8')
                 # Ejemplo: Se pasa de "ARGENTINA" a "argentina"
 
                 # "name_league_temp" es la segunda posición de las 6 seguidas que son no números
@@ -149,6 +157,9 @@ def cath_data():
                 name_league_temp = name_league_temp.rstrip(name_league_temp[-1]).replace(' ', '-').replace('.', '')
                 # Ejemplo: pasar de "LNB - Playoffs" a "lnb"
                 # "NB I. A - Puestos 5º-8º" a "nb-i-a"
+
+                # Eliminar tildes.
+                name_league_temp = unicodedata.normalize('NFKD', name_league_temp).encode('ASCII', 'ignore').decode('utf-8')
 
                 # nombre de la liga en formato de la DB "'nombre país' - 'nombre liga'"
                 name_league = f'{name_country} - {name_league_temp}'
@@ -197,7 +208,7 @@ def cath_data():
                         break
 
                 # Establecer a "temp_div" sobre la posición donde inicia el nuevo aprtido.
-                temp_div += (sum_temp_div)
+                temp_div += sum_temp_div
 
                 break
         # END --------- VERIFICAR PATRON DE INFORMACIÓN: LIGA - PARTIDO.                                                   #
@@ -214,8 +225,8 @@ def cath_data():
             if all(isinstance(item, str) and item.isdigit() for item in div_data[temp_div + 3:temp_div + 13]):
 
                 # Lista con la información relevante del partido actual.
-                list_data_match_currently = [div_data[temp_div + 1], div_data[temp_div + 2], div_data[temp_div + 3 : temp_div + 13]]
-                # list_data_team = [Home, Away, [all_h, all_a, q1_h, q1_a, q2_h, q2_a, q3_h, q3_a, q4_h, q4_a]]
+                list_data_match_currently = [div_data[temp_div + 1], div_data[temp_div + 2], div_data[temp_div + 3 : temp_div + 13], over_time]
+                # list_data_team = [Home, Away, [all_h, all_a, q1_h, q1_a, q2_h, q2_a, q3_h, q3_a, q4_h, q4_a], over_time]
 
                 # Adicionar datos del partido a la lista general de la liga.
                 list_dict_teams_temp.append(list_data_match_currently)
@@ -246,9 +257,8 @@ def cath_data():
             if all(isinstance(item, str) and item.isdigit() for item in div_data[temp_div + 3:temp_div + 15]):
 
                 # Lista con la información relevante del partido actual.
-                list_data_match_currently = [div_data[temp_div + 1], div_data[temp_div + 2],
-                                             div_data[temp_div + 3: temp_div + 13]]
-                # list_data_team = [Home, Away, [all_h, all_a, q1_h, q1_a, q2_h, q2_a, q3_h, q3_a, q4_h, q4_a]]
+                list_data_match_currently = [div_data[temp_div + 1], div_data[temp_div + 2], div_data[temp_div + 3: temp_div + 13], over_time]
+                # list_data_team = [Home, Away, [all_h, all_a, q1_h, q1_a, q2_h, q2_a, q3_h, q3_a, q4_h, q4_a], over_time]
 
                 # Adicionar datos del partido a la lista general de la liga.
                 list_dict_teams_temp.append(list_data_match_currently)
@@ -262,7 +272,7 @@ def cath_data():
             # Sí no se cumple la condición,
             # indica que hay un error en la cantidad de datos de los puntos obtenidos del partido actual.
             else:
-                # Contar el númeor de datos (referentes a puntos) que hay de este partido
+                # Contar el number de datos (referentes a puntos) que hay de este partido
                 for i in range(len(div_data[temp_div + 3:temp_div + 15]) - 1):
                     sum_temp_div = 1
 
@@ -284,13 +294,65 @@ def cath_data():
     del list_names_leagues
     del list_dict_teams_temp
 
+    # Cerrar navegador
+    driver.quit()
+
     for i_dict in dict_leagues_teams:
         print(i_dict, dict_leagues_teams[i_dict])
         print('\n')
 
-    # Cerrar navegador
-    driver.quit()
+        try:
+            # ======================================================================================================== #
+            # OBTENER ID DE LA LIGA.                                                                                   #
+            # ======================================================================================================== #
+            # Obtener id (analysis_basketball.leagues.id_league) de la liga actual
+            query = f'''SELECT id_league FROM leagues
+                        WHERE name_league = "{i_dict}"'''
 
-    # Ahora evciar los datos guardados en el dictionary, a la base de datos
-    # para actualizar la tabla matches y la tabla statistics
-    #
+            current_id_league = fs_select_row(query)[0][0]
+            # END --------- OBTENER ID DE LA LIGA.                                                                 # # #
+            # ======================================================================================================== #
+
+            # Iterar sobre la lista que contiene la cantidad de partidos de cada liga.
+            for i in range(len(dict_leagues_teams[i_dict])):
+                list_names_teams = [dict_leagues_teams[i_dict][i][0], dict_leagues_teams[i_dict][i][1]]
+
+                points_final_home = dict_leagues_teams[i_dict][i][2][0]
+                points_final_away = dict_leagues_teams[i_dict][i][2][1]
+
+                is_win_home = False
+                if points_final_home > points_final_away:
+                    is_win_home = True
+
+                # 2 repeticiones:
+                # i_send_data_t_team == 0 para home y
+                # i_send_data_t_team == 1 para away.
+                for i_send_data_t_team in range(2):
+                    # Generar id_match
+                    id_match = ck_match()
+
+                    # Verificar que el nombre de los equipos están o no, relacionados en "t_team"
+                    # Sí el equipo no existe en t_teams, se guarda dentro del scope de la función
+                    # "ck.check_name_team"
+                    teams_id_team = ck_name(list_names_teams[i_send_data_t_team], current_id_league,
+                                            home_or_away=i_send_data_t_team)
+
+                    if i_send_data_t_team == 0:
+                        # Enviar data de home a "t_matches"
+                        send_data_to_teams_and_matches(teams_id_team, id_match, date_match, True, points_final_home,
+                                                       dict_leagues_teams[i_dict][i][2][2], dict_leagues_teams[i_dict][i][2][4],
+                                                       dict_leagues_teams[i_dict][i][2][6], dict_leagues_teams[i_dict][i][2][8],
+                                                       dict_leagues_teams[i_dict][i][3], is_win_home, home_or_away=i_send_data_t_team)
+
+                    elif i_send_data_t_team == 1:
+                        # Enviar data de away a "t_team" y a "t_matches"
+                        send_data_to_teams_and_matches(teams_id_team, id_match, date_match, False, points_final_away,
+                                                       dict_leagues_teams[i_dict][i][2][3], dict_leagues_teams[i_dict][i][2][5],
+                                                       dict_leagues_teams[i_dict][i][2][7], dict_leagues_teams[i_dict][i][2][9],
+                                                       dict_leagues_teams[i_dict][i][3], not is_win_home, home_or_away=i_send_data_t_team)
+
+            print('Completed Finish match -----------------------------')
+
+        except Exception:
+            print(f'No se puede actualizar los partidos de la liga {i_dict}.'
+                  f'\nPosiblemente esta liga no existe aún en la base de datos.')
