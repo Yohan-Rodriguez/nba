@@ -7,7 +7,7 @@ from conn.connections import conn_db_table_matches as conn_db_matches
 def prepare_data(current_id_league, list_match_temp, date_match, i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_8, i_9, i_10, i_11, i_12,
                  over_time):
     try:
-        # Función para enviar los datos a "t_teams" y "t_matches" ============================ #
+        # Función para enviar los datos a "t_teams" y "t_matches" ==================================================== #
         def send_data_to_teams_and_matchs(teams_id_team, id_match, date_match, is_home,
                                           total_points, q_1, q_2, q_3, q_4, over_time, is_win,
                                           home_or_away):
@@ -21,7 +21,7 @@ def prepare_data(current_id_league, list_match_temp, date_match, i_1, i_2, i_3, 
             print(f'Sending data to "analysis_basketball.teams_has_matches" for {home_or_away}.')
             conn_db_teams_has_matches(teams_id_team, id_match)
 
-        # END --------- Función para enviar los datos a "t_teams" y "t_matches" ============== #
+        # END --------- Función para enviar los datos a "t_teams" y "t_matches" ====================================== #
         name_home = list_match_temp[i_12]
         name_away = list_match_temp[i_11]
         points_final_away = int(list_match_temp[i_1])
@@ -39,9 +39,9 @@ def prepare_data(current_id_league, list_match_temp, date_match, i_1, i_2, i_3, 
         is_win_home = False
         if points_final_home > points_final_away:
             is_win_home = True
-        # ==================================================================================== #
-        # SENDING DATA TO BD                                                                   #
-        # ==================================================================================== #
+        # ============================================================================================================ #
+        # SENDING DATA TO BD                                                                                           #
+        # ============================================================================================================ #
         try:
             list_names_teams = [name_home, name_away]
 

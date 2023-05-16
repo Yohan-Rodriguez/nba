@@ -1,11 +1,11 @@
 1) Investigar sobre el error fatal de Garbage Colletor.
 2) Usar la tabla "links_leagues".
 3) Diseñar el formato de mostrar las estadísticas de un partido en vivo. 
-4) Acxtualizar la t_statistics al mismo tiempo que se actualiza la t_macthes
+4) Actualizar la t_statistics al mismo tiempo que se actualiza la t_macthes
 5) Análisis estadístico.
-6) Aplicar aprendiaje autonomo automático.
+6) Aplicar aprendizaje autonomo automático.
 7) Front-End.
 8) Investigar y aplicar el uso del modulo gc, del garbage collector, para la gestión de memoria en python.
-9) Separa funcionalidad de calcular estadísticas a ver estadísticas.
+9) Separar funcionalidad de calcular estadísticas a ver estadísticas.
 10) Realizar digrama de relación entre funciones y modulos.
 11) Optimizar código elimiando código duplicado.

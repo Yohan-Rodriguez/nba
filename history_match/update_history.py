@@ -2,29 +2,10 @@ import time
 import unicodedata
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from check_db_and_controllers.check_data_in_db import check_id_match as ck_match
-from conn.connections import conn_db_table_teams_has_matches as conn_db_teams_has_matches
-from conn.connections import conn_db_table_matches as conn_db_matches
-from check_db_and_controllers.check_data_in_db import check_name_team as ck_name
-from conn.functions_shared import select_row as fs_select_row
+from history_match.history_functions_shared import search_button, get_id_league_currently, send_data_to_db
 
 
-# ================================================================================================================ #
-# Función para enviar los datos a "t_teams" y "t_matches"                                                          #
-# ================================================================================================================ #
-def send_data_to_teams_and_matches(teams_id_team, id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4,
-                                   over_time, is_win, home_or_away):
-    # Enviar data a "t_matches"
-    print(f'Sending data to "analysis_basketball.matches" for {home_or_away}.')
-    conn_db_matches(id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4, over_time, is_win)
-
-    # Enviar data a "t_teams_has_matches"
-    print(f'Sending data to "analysis_basketball.teams_has_matches" for {home_or_away}.')
-    conn_db_teams_has_matches(teams_id_team, id_match)
-# END --------- Función para enviar los datos a "t_teams" y "t_matches" ============== #
-
-
-def cath_data():
+def catch_data():
     # ================================================================================================================ #
     # CHROME DRIVER CONNECTION                                                                                         #
     # ================================================================================================================ #
@@ -38,40 +19,15 @@ def cath_data():
     # ================================================================================================================ #
 
     # ================================================================================================================ #
-    # BUSCAR CSS_SELECTOR BUTTON                                                                                       #
-    # ================================================================================================================ #
-    def search_button(selector_css_button):
-        # Salida de emergencia al siguiente bucle para evitar que sea infinito
-        flag_emergency_button = 5
-
-        while True:
-            try:
-                button_previous = driver.find_element(By.CSS_SELECTOR, selector_css_button)
-                break
-
-            except Exception:
-                print(f'Reintentando obtener XPATH de "Mostrar Más partidos".\nIntentos Restante: -{flag_emergency_button} s')
-                time.sleep(2)
-
-                if flag_emergency_button <= 0:
-                    button_previous = ''
-                    break
-
-                flag_emergency_button -= 1
-
-        return button_previous
-    # END --------- BUSCAR CSS_SELECTOR BUTTON                                                                         #
-    # ================================================================================================================ #
-
-    # ================================================================================================================ #
     # SEARCH DAY IN CALENDAR.                                                                                          #
     # ================================================================================================================ #
-    button = search_button('#live-table > div.filters > div.filters__group > div:nth-child(4) > div')
+    button = search_button(driver, '#live-table > div.filters > div.filters__group > div:nth-child(4) > div')
     driver.execute_script("arguments[0].click();", button)
     time.sleep(3)
     print('Click on button "FINALIZADOS"')
 
-    button_calendar = search_button('#live-table > div.filters > div.calendarCont > div > button.calendar__navigation.calendar__navigation--yesterday')
+    button_calendar = search_button(driver,
+                                    '#live-table > div.filters > div.calendarCont > div > button.calendar__navigation.calendar__navigation--yesterday')
     driver.execute_script("arguments[0].click();", button_calendar)
     time.sleep(3)
     print('Click on button "CALENDAR"')
@@ -220,7 +176,7 @@ def cath_data():
         # Verificar si el partido tuvo o no overtime.
         over_time = False
         if div_data[temp_div] == "Finalizado":
-            # Sí no tuvo overtime, verificar que las posiciones numericas sean 10:
+            # Sí no tuvo overtime, verificar que las posiciones numéricas sean 10:
             # 2 de puntajes finales y 8 de puntajes por cuartos.
             if all(isinstance(item, str) and item.isdigit() for item in div_data[temp_div + 3:temp_div + 13]):
 
@@ -305,11 +261,7 @@ def cath_data():
             # ======================================================================================================== #
             # OBTENER ID DE LA LIGA.                                                                                   #
             # ======================================================================================================== #
-            # Obtener id (analysis_basketball.leagues.id_league) de la liga actual
-            query = f'''SELECT id_league FROM leagues
-                        WHERE name_league = "{i_dict}"'''
-
-            current_id_league = fs_select_row(query)[0][0]
+            current_id_league = get_id_league_currently(i_dict)
             # END --------- OBTENER ID DE LA LIGA.                                                                 # # #
             # ======================================================================================================== #
 
@@ -324,34 +276,17 @@ def cath_data():
                 if points_final_home > points_final_away:
                     is_win_home = True
 
-                # 2 repeticiones:
-                # i_send_data_t_team == 0 para home y
-                # i_send_data_t_team == 1 para away.
-                for i_send_data_t_team in range(2):
-                    # Generar id_match
-                    id_match = ck_match()
-
-                    # Verificar que el nombre de los equipos están o no, relacionados en "t_team"
-                    # Sí el equipo no existe en t_teams, se guarda dentro del scope de la función
-                    # "ck.check_name_team"
-                    teams_id_team = ck_name(list_names_teams[i_send_data_t_team], current_id_league,
-                                            home_or_away=i_send_data_t_team)
-
-                    if i_send_data_t_team == 0:
-                        # Enviar data de home a "t_matches"
-                        send_data_to_teams_and_matches(teams_id_team, id_match, date_match, True, points_final_home,
-                                                       dict_leagues_teams[i_dict][i][2][2], dict_leagues_teams[i_dict][i][2][4],
-                                                       dict_leagues_teams[i_dict][i][2][6], dict_leagues_teams[i_dict][i][2][8],
-                                                       dict_leagues_teams[i_dict][i][3], is_win_home, home_or_away=i_send_data_t_team)
-
-                    elif i_send_data_t_team == 1:
-                        # Enviar data de away a "t_team" y a "t_matches"
-                        send_data_to_teams_and_matches(teams_id_team, id_match, date_match, False, points_final_away,
-                                                       dict_leagues_teams[i_dict][i][2][3], dict_leagues_teams[i_dict][i][2][5],
-                                                       dict_leagues_teams[i_dict][i][2][7], dict_leagues_teams[i_dict][i][2][9],
-                                                       dict_leagues_teams[i_dict][i][3], not is_win_home, home_or_away=i_send_data_t_team)
-
-            print('Completed Finish match -----------------------------')
+                # ==================================================================================================== #
+                # SENDING DATA TO BD                                                                                   #
+                # ==================================================================================================== #
+                send_data_to_db(list_names_teams, current_id_league, date_match, points_final_home, points_final_home,
+                                dict_leagues_teams[i_dict][i][2][2], dict_leagues_teams[i_dict][i][2][4],
+                                dict_leagues_teams[i_dict][i][2][6], dict_leagues_teams[i_dict][i][2][8],
+                                dict_leagues_teams[i_dict][i][3], is_win_home, points_final_away,
+                                dict_leagues_teams[i_dict][i][2][3], dict_leagues_teams[i_dict][i][2][5],
+                                dict_leagues_teams[i_dict][i][2][7], dict_leagues_teams[i_dict][i][2][9])
+                # ==================================================================================================== #
+                # END ---------SENDING DATA TO BD
 
         except Exception:
             print(f'No se puede actualizar los partidos de la liga {i_dict}.'

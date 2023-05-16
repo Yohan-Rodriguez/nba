@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from conn.connections import insert_row as conn_insert_row
+from conn.conn_functions_shared import insert_row as conn_insert_row
 import history_links.links as links
 
 

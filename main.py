@@ -2,12 +2,12 @@
 # Press Mayús+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
-from conn.connections import insert_row
 from history_links.search_links_leagues import search_link
-from history_match.load_history import cath_data as load_data
-from history_match.update_history import cath_data as update_data
-from conn.functions_shared import select_row as fs_select_row
-from statistics_dir.calculate_statistics import get_data
+from history_match.load_history import catch_data as load_data
+from history_match.update_history import catch_data as update_data
+from conn.conn_functions_shared import select_row as fs_select_row
+from statistics_dir.calculate_statistics import prepare_data_for_statistics_one_team
+from statistics_dir.calculate_statistics import prepare_data_for_statistics_all_teams
 from check_db_and_controllers.show_list_options import show_options
 
 
@@ -15,22 +15,22 @@ from check_db_and_controllers.show_list_options import show_options
 # LOAD NEW DATA TO HISTORY.                                                                                            #
 # ==================================================================================================================== #
 def new_league_history():
+
     list_links_leagues = [
                           # 'https://www.flashscore.co/baloncesto/espana/liga-endesa/resultados/',
                           # 'https://www.flashscore.co/baloncesto/argentina/lnb/resultados/',
                           # 'https://www.flashscore.co/baloncesto/austria/superliga/resultados/',
-                          # 'https://www.flashscore.co/baloncesto/dinamarca/basketligaen/resultados/',
-                          # 'https://www.flashscore.co/baloncesto/eslovenia/liga-nova-kbm/resultados/',
-                          # 'https://www.flashscore.co/baloncesto/finlandia/korisliiga/resultados/',
-                          # 'https://www.flashscore.co/baloncesto/letonia/lbl/resultados/',
-                          # 'https://www.flashscore.co/baloncesto/nueva-zelanda/nbl/resultados/',
-                          # 'https://www.flashscore.co/baloncesto/polonia/energa-basket-liga/resultados/',
-                          # 'https://www.flashscore.co/baloncesto/puerto-rico/bsn/resultados/',
-                          # 'https://www.flashscore.co/baloncesto/republica-checa/nbl/resultados/',
-                          # 'https://www.flashscore.co/baloncesto/rumania/divizia-a/resultados/'
-                          # 'https://www.flashscore.co/baloncesto/usa/nba/resultados/'
+                          'https://www.flashscore.co/baloncesto/dinamarca/basketligaen/resultados/',
+                          'https://www.flashscore.co/baloncesto/eslovenia/liga-nova-kbm/resultados/',
+                          'https://www.flashscore.co/baloncesto/finlandia/korisliiga/resultados/',
+                          'https://www.flashscore.co/baloncesto/letonia/lbl/resultados/',
+                          'https://www.flashscore.co/baloncesto/nueva-zelanda/nbl/resultados/',
+                          'https://www.flashscore.co/baloncesto/polonia/energa-basket-liga/resultados/',
+                          'https://www.flashscore.co/baloncesto/puerto-rico/bsn/resultados/',
+                          'https://www.flashscore.co/baloncesto/republica-checa/nbl/resultados/',
+                          'https://www.flashscore.co/baloncesto/rumania/divizia-a/resultados/'
+                          'https://www.flashscore.co/baloncesto/usa/nba/resultados/'
     ]
-
     load_data(list_links_leagues)
 # END --------- LOAD NEW DATA TO HISTORY.                                                                          # # #
 # ==================================================================================================================== #
@@ -123,9 +123,9 @@ def see_forecast():
 # # para guardar en la base de datos.
 # new_league_history()
 
-# Actualizar historial de equipos y sus estadísticas en cada liga,
-# para guardar en la base de datos.
-update_history()
+# # Actualizar historial de equipos y sus estadísticas en cada liga,
+# # para guardar en la base de datos.
+# update_history()
 
 # # Obtener estadísticas de los equipos
 # get_statistics()
@@ -135,3 +135,6 @@ update_history()
 # END --------- FUNCTIONS CALLS                                                                                    # # #
 # ==================================================================================================================== #
 
+
+# prepare_data_for_statistics_all_teams(list_id_leagues=[2559])
+# prepare_data_for_statistics_one_team(id_league=2559, name_team='Milwaukee Bucks')

@@ -1,5 +1,5 @@
-from conn.connections import conn_to_database as conn_db
-from conn.connections import database_default
+from conn.conn_to_database import conn_to_database as conn_db
+from conn.conn_to_database import database_default
 
 
 # ==================================================================================================================== #
@@ -15,4 +15,16 @@ def select_row(query, database=database_default):
 
     return my_result
 # END --------- READ                                                                                               # # #
+# ==================================================================================================================== #
+
+
+# ==================================================================================================================== #
+# INSERT                                                                                                               #
+# ==================================================================================================================== #
+def insert_row (query, database=database_default):
+    conn = conn_db(database=database)
+    conn[1].execute(query)
+
+    conn[0].commit()
+# END --------- INSERT                                                                                             # # #
 # ==================================================================================================================== #

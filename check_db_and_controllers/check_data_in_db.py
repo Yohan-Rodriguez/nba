@@ -1,6 +1,6 @@
 from random import randint
 from conn.connections import conn_db_table_teams_has_leagues as conn_db_teams_has_leagues
-from conn.functions_shared import select_row as fs_select_row
+from conn.conn_functions_shared import select_row as fs_select_row
 from conn.connections import conn_db_table_leagues as conn_db_leagues
 from conn.connections import conn_db_table_teams as conn_db_teams
 

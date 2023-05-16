@@ -2,33 +2,12 @@ import time
 import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from check_db_and_controllers.check_data_in_db import check_id_match as ck_match
-from conn.connections import conn_db_table_teams_has_matches as conn_db_teams_has_matches
-from conn.connections import conn_db_table_matches as conn_db_matches
-from check_db_and_controllers.check_data_in_db import check_name_team as ck_name
 from check_db_and_controllers.check_data_in_db import check_name_league as ck_name_league
 from check_db_and_controllers.check_data_in_db import list_names_leagues as ck_list_name_league
-from conn.functions_shared import select_row as fs_select_row
+from history_match.history_functions_shared import search_button, get_id_league_currently, send_data_to_db
 
 
-# ==================================================================================================================== #
-# Función para enviar los datos a "t_teams" y "t_matches"                                                              #
-# ==================================================================================================================== #
-def send_data_to_teams_and_matches(teams_id_team, id_match, date_match, is_home,
-                                   total_points, q_1, q_2, q_3, q_4, over_time, is_win,
-                                   home_or_away):
-    # Enviar data a "t_matches"
-    print(f'Sending data to "analysis_basketball.matches" for {home_or_away}.')
-    conn_db_matches(id_match, date_match, is_home, total_points, q_1,
-                    q_2, q_3, q_4, over_time, is_win)
-
-    # Enviar data a "t_teams_has_matches"
-    print(f'Sending data to "analysis_basketball.teams_has_matches" for {home_or_away}.')
-    conn_db_teams_has_matches(teams_id_team, id_match)
-# END --------- Función para enviar los datos a "t_teams" y "t_matches" ============================================== #
-
-
-def cath_data(list_links_leagues):
+def catch_data(list_links_leagues):
     # ================================================================================================================ #
     # CHROME DRIVER CONNECTION                                                                                         #
     # ================================================================================================================ #
@@ -38,33 +17,6 @@ def cath_data(list_links_leagues):
     driver = webdriver.Chrome(options=options, executable_path=driver_path)
     driver.maximize_window()
     # END --------- CHROME DRIVER CONNECTION                                                                           #
-    # ================================================================================================================ #
-
-    # ================================================================================================================ #
-    #                                                                                                          #
-    # ================================================================================================================ #
-    def search_button(selector_css_button):
-        # Salida de emergencia al siguiente bucle para evitar que sea infinito
-        flag_emergency_button = 5
-
-        while True:
-            try:
-                button_previous = driver.find_element(By.CSS_SELECTOR, selector_css_button)
-                break
-
-            except Exception:
-                print(
-                    f'Reintentando obtener XPATH de "Mostrar Más partidos".\nIntentos Restante: -{flag_emergency_button} s')
-                time.sleep(2)
-
-                if flag_emergency_button <= 0:
-                    button_previous = ''
-                    break
-
-                flag_emergency_button -= 1
-
-        return button_previous
-    # END ---------                                                                                                    #
     # ================================================================================================================ #
 
     count_league = 0
@@ -113,16 +65,14 @@ def cath_data(list_links_leagues):
         # ============================================================================================================ #
 
         # ============================================================================================================ #
-        # ENVIAR NOMBRE DE LA LIGA A LA TABLEA "league"                                                                #
+        # ENVIAR NOMBRE DE LA LIGA A LA TABLEA "league" Y OBTENER ID DE LA LIGA.                                       #
         # ============================================================================================================ #
         # Enviar nombre de liga , sí no existe, a la tabla "analysis_basketball.leagues".
         ck_name_league(new_name_league)
 
         # Obtener id (analysis_basketball.leagues.id_league) de la liga actual
-        query = f'''SELECT id_league FROM leagues
-                    WHERE name_league = "{ck_list_name_league[-1]}"'''
-        current_id_league = fs_select_row(query)[0][0]
-        # END --------- ENVIAR NOMBRE DE LA LIGA A LA TABLEA "league"                                              # # #
+        current_id_league = get_id_league_currently(ck_list_name_league[-1])
+        # END --------- ENVIAR NOMBRE DE LA LIGA A LA TABLEA "league" Y OBTENER ID DE LA LIGA.                     # # #
         # ============================================================================================================ #
 
         # ============================================================================================================ #
@@ -146,9 +96,9 @@ def cath_data(list_links_leagues):
             # Buscar patron de fechas en cada posición de la lista main
             # Se itera desde la última posición hasta la primera.
             for i_list_all_data in range(-1, ((-1) * len(div_data)), -1):
-                # ======================================================================================================== #
-                # SEPARAR Y LIMPIAR LOS DATOS DE CADA PARTIDO                                                              #
-                # ======================================================================================================== #
+                # ==================================================================================================== #
+                # SEPARAR Y LIMPIAR LOS DATOS DE CADA PARTIDO                                                          #
+                # ==================================================================================================== #
                 # Determinar si la posición cumple con el patrón de fecha establecido.
                 match = patron_fecha.search(div_data[i_list_all_data])
 
@@ -193,12 +143,12 @@ def cath_data(list_links_leagues):
 
                     # Modificar el límite superior, con cada iteración, de cada lista única de un partido.
                     upper_limit = i_list_all_data
-                    # ==================================================================================================== #
-                    # END ---------SEPARAR Y LIMPIAR LOS DATOS DE CADA PARTIDO                                         # # #
+                    # ================================================================================================ #
+                    # END ---------SEPARAR Y LIMPIAR LOS DATOS DE CADA PARTIDO                                     # # #
 
-                    # ==================================================================================================== #
-                    # ASIGNAR DATOS DE LAS COLUMNAS DE LAS TABLAS                                                          #
-                    # ==================================================================================================== #
+                    # ================================================================================================ #
+                    # ASIGNAR DATOS DE LAS COLUMNAS DE LAS TABLAS                                                      #
+                    # ================================================================================================ #
                     try:
                         name_home = list_data_match[1]
                         name_away = list_data_match[2]
@@ -219,45 +169,24 @@ def cath_data(list_links_leagues):
 
                     except Exception as e:
                         print(f'X*X*X*X* EXCEPTION X*X*X*X*\n\tIN: ASIGNAR DATOS DE LAS COLUMNAS DE LAS TABLAS\n{e}')
-                    # ==================================================================================================== #
-                    # END ---------ASIGNAR DATOS DE LAS COLUMNAS DE LAS TABLAS                                         # # #
+                    # ================================================================================================ #
+                    # END ---------ASIGNAR DATOS DE LAS COLUMNAS DE LAS TABLAS                                     # # #
 
-                    # ==================================================================================================== #
-                    # SENDING DATA TO BD                                                                                   #
-                    # ==================================================================================================== #
+                    # ================================================================================================ #
+                    # SENDING DATA TO BD                                                                               #
+                    # ================================================================================================ #
                     try:
                         list_names_teams = [name_home, name_away]
 
-                        # 2 repeticiones:
-                        # i_send_data_t_team == 0 para home y
-                        # i_send_data_t_team == 1 para away.
-                        for i_send_data_t_team in range(2):
-                            # Generar id_match
-                            id_match = ck_match()
+                        send_data_to_db(list_names_teams, current_id_league, date_match, points_final_home, q_1H, q_2H,
+                                        q_3H, q_4H, is_over_time, is_win_home, points_final_away, q_1A, q_2A, q_3A, q_4A)
 
-                            # Verificar que el nombre de los equipos están o no, relacionados en "t_team"
-                            # Sí el equipo no existe en t_teams, se guarda dentro del scope de la función
-                            # "ck.check_name_team"
-                            teams_id_team = ck_name(list_names_teams[i_send_data_t_team], current_id_league,
-                                                    home_or_away=i_send_data_t_team)
-
-                            if i_send_data_t_team == 0:
-                                # Enviar data de home a "t_matches"
-                                send_data_to_teams_and_matches(teams_id_team, id_match, date_match, True, points_final_home, q_1H,
-                                                               q_2H, q_3H, q_4H, is_over_time, is_win_home, home_or_away=i_send_data_t_team)
-
-                            elif i_send_data_t_team == 1:
-                                # Enviar data de away a "t_team" y a "t_matches"
-                                send_data_to_teams_and_matches(teams_id_team, id_match, date_match, False, points_final_away, q_1A,
-                                                               q_2A, q_3A, q_4A, is_over_time, not is_win_home, home_or_away=i_send_data_t_team)
-
-                        print('Completed Finish match -----------------------------')
                         count_match += 1
 
                     except Exception as e:
                         print(f'X*X*X*X* EXCEPTION X*X*X*X*\n\tIn SENDING DATA TO BD\n {e}')
-                    # ==================================================================================================== #
-                    # END ---------SENDING DATA TO BD                                                                  # # #
+                    # ================================================================================================ #
+                    # END ---------SENDING DATA TO BD                                                              # # #
 
                 print('\n')
 
