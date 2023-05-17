@@ -381,3 +381,23 @@ def prepare_data_for_statistics_one_team(id_league, name_team):
     calculate_statistics_one_team_in_unique_league(result_data_one_team, id_league, name_team)
 # END --------- ET DATA TABLE TEAMS                                                                                # # #
 # # ================================================================================================================== #
+
+
+def show_statistics(tupla_ids_leagues_get, tupla_names_teams):
+    try:
+        # tupla_names_teams = ('Union De Santa Fe', 'Ferro', 'Quimsa')
+        query = f'''SELECT *
+                    FROM statistics
+                    JOIN teams_has_leagues ON statistics.id_teams_id_team = teams_has_leagues.teams_id_team  
+                    JOIN teams ON teams_has_leagues.teams_id_team = teams.id_team
+                    WHERE teams.name_team IN {tupla_names_teams}
+                      AND statistics.id_leagues_id_league IN {tupla_ids_leagues_get} '''
+
+        result_data_statistics = fs_select_row(query)
+        df_get_statistics = pd.DataFrame(data=result_data_statistics)#, columns=['name', 'is_home', 'total_points', 'q_1', 'q_2', 'q_3', 'q_4', 'is_win'])
+        print(df_get_statistics.iloc[[0, 1], [3, 4, 5, 6, 7]])
+
+    except Exception as e:
+        print(f'EXCEPTION IN calculate_statistics.py.show_statistics\n{e}')
+
+

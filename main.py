@@ -6,9 +6,9 @@ from history_links.search_links_leagues import search_link
 from history_match.load_history import catch_data as load_data
 from history_match.update_history import catch_data as update_data
 from conn.conn_functions_shared import select_row as fs_select_row
-from statistics_dir.calculate_statistics import prepare_data_for_statistics_one_team
+from statistics_dir.calculate_statistics import prepare_data_for_statistics_one_team, show_statistics
 from statistics_dir.calculate_statistics import prepare_data_for_statistics_all_teams
-from check_db_and_controllers.show_list_options import show_options
+from statistics_dir.statistics_functions_shared import show_options, see_options
 
 
 # ==================================================================================================================== #
@@ -48,18 +48,68 @@ def update_history():
 # ==================================================================================================================== #
 # STATISTICS                                                                                                           #
 # ==================================================================================================================== #
-def get_statistics():
-    query = '''SELECT name_league, id_league 
-               FROM leagues
-               ORDER BY name_league ASC'''
-    # list_leagues :: lista de tuplas,
-    # cada tupla con dos posiciones (name_league, id_league)
-    list_leagues = fs_select_row(query)
-    del query
+def calculate_and_get_statistics():
+    def calculate_statistics():
+        pass
+        # Funciona !!!
+        # list_id_leagues = [3504]
+        # # open_browser.catch_match()
+        # prepare_data_for_statistics_all_teams(list_id_leagues)
 
-    # Usar la función show_options(
-    msn_to_show = '\nSeleccione la liga del (los) equipo()s0 a análizar:'
-    msn_to_show_leagues = show_options(list_with_options=list_leagues, msn_to_show=msn_to_show)
+    def get_statistics():
+        # Obtener IDs de las ligas.
+        ids_leagues_get = see_options(repeat_num=1)
+        # Ejemplo: ids_leagues_get = (6093, 4502)
+        print(ids_leagues_get)
+
+        # Obtener los nombres de los equipos de las ligas seleccionadas en la función anterior
+        names_teams_get = see_options(repeat_num=2, tuple_get=ids_leagues_get)
+        # Ejemplo: names_teams_get = ('Union De Santa Fe', 'Ferro', 'Quimsa')
+        print(names_teams_get)
+
+        # Obtener las estadísticas de los equipos seleccionados en la función anterior.
+        show_statistics(ids_leagues_get, names_teams_get)
+
+
+    while True:
+        try:
+            select_calc_or_get = int(input('\nSeleccione:\n\t1: Obtener estadísticas.\n\t2: Calcular estadísticas.\n\t0: SALIR.\n\n\t-> '))
+
+            if select_calc_or_get == 1:
+                get_statistics()
+
+            elif select_calc_or_get == 2:
+                calculate_statistics()
+
+            elif select_calc_or_get == 0:
+                break
+
+            else:
+                print('\tIngrese un número que esté dentro de la lista.\n')
+
+        except Exception:
+            print('\tEl character ingresado no es un número.\n')
+
+    # # Solicitud de información a la tabla "analysis_basketball".teams con el id de liga dado
+    # list_id_leagues = [3504]
+# END --------- STATISTICS                                                                                         # # #
+# ==================================================================================================================== #
+
+
+def see_forecast():
+    pass
+
+    # query = '''SELECT name_league, id_league
+    #            FROM leagues
+    #            ORDER BY name_league ASC'''
+    # # list_leagues :: lista de tuplas,
+    # # cada tupla con dos posiciones (name_league, id_league)
+    # list_leagues = fs_select_row(query)
+    # del query
+    #
+    # # Usar la función show_options(
+    # msn_to_show = '\nSeleccione la liga del (los) equipo()s a análizar:'
+    # msn_to_show_leagues = show_options(list_with_options=list_leagues, msn_to_show=msn_to_show)
 
 
     # try:
@@ -100,20 +150,6 @@ def get_statistics():
     # except Exception:
     #     print('\tEl character ingresado no es un número.\n')
 
-    # # Solicitud de información a la tabla "analysis_basketball".teams con el id de liga dado
-    # list_id_leagues = [9862]
-    #
-
-    # # open_browser.catch_match()
-    # get_data(list_id_leagues)
-
-
-# END --------- STATISTICS                                                                                         # # #
-# ==================================================================================================================== #
-
-
-def see_forecast():
-    pass
 
 
 # ==================================================================================================================== #
@@ -123,12 +159,18 @@ def see_forecast():
 # # para guardar en la base de datos.
 # new_league_history()
 
+
 # # Actualizar historial de equipos y sus estadísticas en cada liga,
 # # para guardar en la base de datos.
 # update_history()
 
+
+# Calcular estadísticas
+calculate_and_get_statistics()
+
 # # Obtener estadísticas de los equipos
-# get_statistics()
+# calculate_and_get_statistics.get_statistics()
+
 
 # # Ver pronósticos de un o dos equipo.
 # see_forecast()
