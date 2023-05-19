@@ -18,9 +18,9 @@ USE analysis_basketball;
 # ----------------------------------  
 
 # ----------------------------------  
-# DELETE FROM t_errors;
-# DELETE FROM leagues;
-# WHERE link_league = 'https://www.sofascore.com/tournament/basketball/argentina/super-20/10701';
+# DELETE FROM gral_statistics;
+ DELETE FROM gral_statistics
+ WHERE leagues_id_league = 5722;
 # ----------------------------------  
 
 

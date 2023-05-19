@@ -15,12 +15,12 @@ ORDER BY name_league;
 SELECT teams.id_team AS ID_TEAM, teams.name_team AS NAME_TEAM
 FROM teams
 JOIN teams_has_leagues ON teams.id_team = teams_has_leagues.teams_id_team
-WHERE teams_has_leagues.leagues_id_league = 2559
+WHERE teams_has_leagues.leagues_id_league = 6093
 ORDER BY teams.name_team ASC;
 # ---------------------------------------------------------------------------------------------- 
 
-SET @home = 'Argentino';
-SET @away = 'Atenas';
+SET @home = 'Obras';
+SET @away = 'Olimpico';
 
 
 # AVERAGE, DEPENDIENDO SI ES LOCAL O VISITANTE, POR EQUIPO: ------------------------------------
@@ -59,7 +59,7 @@ SELECT teams.name_team AS NAME_TEAM,
 	   MIN(q_2) as MIN_Q2,
        MIN(q_3) as MIN_Q3,
        MIN(q_4) as MIN_Q4,
-       MIN(total_points) as MAX_TOTAL_POINTS
+       MIN(total_points) as MIN_TOTAL_POINTS
 FROM matches 
 JOIN teams_has_matches ON matches.id_match = teams_has_matches.matches_id_match
 JOIN teams ON teams_has_matches.teams_id_team = teams.id_team
