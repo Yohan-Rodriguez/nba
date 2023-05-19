@@ -20,15 +20,15 @@ def new_league_history():
                           # 'https://www.flashscore.co/baloncesto/espana/liga-endesa/resultados/',
                           # 'https://www.flashscore.co/baloncesto/argentina/lnb/resultados/',
                           # 'https://www.flashscore.co/baloncesto/austria/superliga/resultados/',
-                          'https://www.flashscore.co/baloncesto/dinamarca/basketligaen/resultados/',
-                          'https://www.flashscore.co/baloncesto/eslovenia/liga-nova-kbm/resultados/',
-                          'https://www.flashscore.co/baloncesto/finlandia/korisliiga/resultados/',
-                          'https://www.flashscore.co/baloncesto/letonia/lbl/resultados/',
-                          'https://www.flashscore.co/baloncesto/nueva-zelanda/nbl/resultados/',
-                          'https://www.flashscore.co/baloncesto/polonia/energa-basket-liga/resultados/',
-                          'https://www.flashscore.co/baloncesto/puerto-rico/bsn/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/dinamarca/basketligaen/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/eslovenia/liga-nova-kbm/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/finlandia/korisliiga/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/letonia/lbl/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/nueva-zelanda/nbl/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/polonia/energa-basket-liga/resultados/',
+                          # 'https://www.flashscore.co/baloncesto/puerto-rico/bsn/resultados/',
                           'https://www.flashscore.co/baloncesto/republica-checa/nbl/resultados/',
-                          'https://www.flashscore.co/baloncesto/rumania/divizia-a/resultados/'
+                          'https://www.flashscore.co/baloncesto/rumania/divizia-a/resultados/',
                           'https://www.flashscore.co/baloncesto/usa/nba/resultados/'
     ]
     load_data(list_links_leagues)
@@ -59,17 +59,15 @@ def calculate_and_get_statistics():
     def get_statistics():
         # Obtener IDs de las ligas.
         ids_leagues_get = see_options(repeat_num=1)
-        # Ejemplo: ids_leagues_get = (6093, 4502)
-        print(ids_leagues_get)
+        # Ejemplo: ids_leagues_get = (6093, [])
 
         # Obtener los nombres de los equipos de las ligas seleccionadas en la función anterior
-        names_teams_get = see_options(repeat_num=2, tuple_get=ids_leagues_get)
-        # Ejemplo: names_teams_get = ('Union De Santa Fe', 'Ferro', 'Quimsa')
+        names_teams_get = see_options(repeat_num=2, id_get=ids_leagues_get[0])
+        # Ejemplo: names_teams_get = ('Union De Santa Fe', ['Atenas', 'Union De Santa Fe'])
         print(names_teams_get)
 
         # Obtener las estadísticas de los equipos seleccionados en la función anterior.
-        show_statistics(ids_leagues_get, names_teams_get)
-
+        show_statistics(id_leagues_get=ids_leagues_get[0], tuple_names_teams=tuple(names_teams_get[1]))
 
     while True:
         try:
@@ -155,9 +153,9 @@ def see_forecast():
 # ==================================================================================================================== #
 # FUNCTIONS CALLS                                                                                                      #
 # ==================================================================================================================== #
-# # Cargar nueva data al historial de equipos y sus estadísticas en cada liga,
-# # para guardar en la base de datos.
-# new_league_history()
+# Cargar nueva data al historial de equipos y sus estadísticas en cada liga,
+# para guardar en la base de datos.
+new_league_history()
 
 
 # # Actualizar historial de equipos y sus estadísticas en cada liga,
@@ -165,8 +163,8 @@ def see_forecast():
 # update_history()
 
 
-# Calcular estadísticas
-calculate_and_get_statistics()
+# # Calcular estadísticas
+# calculate_and_get_statistics()
 
 # # Obtener estadísticas de los equipos
 # calculate_and_get_statistics.get_statistics()
@@ -180,3 +178,5 @@ calculate_and_get_statistics()
 
 # prepare_data_for_statistics_all_teams(list_id_leagues=[2559])
 # prepare_data_for_statistics_one_team(id_league=2559, name_team='Milwaukee Bucks')
+
+# prepare_data_for_statistics_all_teams(5722)

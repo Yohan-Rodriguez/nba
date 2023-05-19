@@ -104,7 +104,7 @@ list_names_leagues = []
 
 
 # Esta función es llamada en un archivo externo (old_load_history.py)
-def check_name_league(name_league):
+def check_name_league(name_league,new_tab_open):
     # id de la liga (PK)
     id_league = randint(100, 10000)
 
@@ -121,7 +121,7 @@ def check_name_league(name_league):
     if len(id_name_exists) == 0:
         # Enviar data a "t_league"
         print('Sending data to "analysis_basketball.leagues".')
-        conn_db_leagues(id_league, name_league)
+        conn_db_leagues(id_league, name_league, new_tab_open)
         list_names_leagues.append(name_league)
 
     else:
@@ -174,7 +174,8 @@ def check_id_statistics():
     while True:
         id_statistics_temp = randint(1000, 1000000)
         # Buscar si el ID generado aleatoriamente existe en la "t_team"
-        query = f'''SELECT id_statistics FROM statistics
+        query = f'''SELECT id_statistics 
+                    FROM gral_statistics
                     WHERE id_statistics =  {id_statistics_temp}'''
 
         # "id_team_exists" es una lista con una tupla que contiene el id_team

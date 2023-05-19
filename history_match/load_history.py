@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from check_db_and_controllers.check_data_in_db import check_name_league as ck_name_league
 from check_db_and_controllers.check_data_in_db import list_names_leagues as ck_list_name_league
 from history_match.history_functions_shared import search_button, get_id_league_currently, send_data_to_db
+from statistics_dir.calculate_statistics import prepare_data_for_statistics_all_teams
 
 
 def catch_data(list_links_leagues):
@@ -53,12 +54,13 @@ def catch_data(list_links_leagues):
         # driver.execute_script("arguments[0].click();", button)
         while True:
             try:
-                button = search_button('#live-table > div.event.event--results > div > div > a')
+                button = search_button(driver, '#live-table > div.event.event--results > div > div > a')
                 driver.execute_script("arguments[0].click();", button)
                 time.sleep(3)
                 print('Click on button "Mostrar más partidos"')
 
-            except Exception:
+            except Exception as e:
+                print(e)
                 break
         # Liberar espacio de almacenamiento para evitar fugas de memoria
         # END --------- BUSCAR Y DAR CLIC SOBRE EL CSS_SELECTOR DEL BOTÓN                                          # # #
@@ -68,7 +70,7 @@ def catch_data(list_links_leagues):
         # ENVIAR NOMBRE DE LA LIGA A LA TABLEA "league" Y OBTENER ID DE LA LIGA.                                       #
         # ============================================================================================================ #
         # Enviar nombre de liga , sí no existe, a la tabla "analysis_basketball.leagues".
-        ck_name_league(new_name_league)
+        ck_name_league(new_name_league, new_tab_open)
 
         # Obtener id (analysis_basketball.leagues.id_league) de la liga actual
         current_id_league = get_id_league_currently(ck_list_name_league[-1])
@@ -81,7 +83,10 @@ def catch_data(list_links_leagues):
         # Obtener la data de todos los partidos cargados en el DIV
         try:
             div_data = driver.find_element(By.CSS_SELECTOR, '#live-table > div.event.event--results > div > div').text.splitlines()
+                                                           # #live-table > div.event.event--results > div > div
+                                                           # #live-table > div.event.event--results > div > div
 
+            print(div_data)
         except Exception as e:
             print(f'X*X*X*X* EXCEPTION X*X*X*X*\n\tIN: GET A LOAD DATA TO LEAGUE\n{e}')
 
@@ -176,12 +181,23 @@ def catch_data(list_links_leagues):
                     # SENDING DATA TO BD                                                                               #
                     # ================================================================================================ #
                     try:
+                        # Duración de un quarto, en minutos.
+                        time_quarter = 10
+                        if new_name_league == 'usa - nba':
+                            time_quarter = 12
+                        print('time_quarter: ' + str(time_quarter))
+
+                        # Nombre de los 2 equipos del partido
                         list_names_teams = [name_home, name_away]
 
                         send_data_to_db(list_names_teams, current_id_league, date_match, points_final_home, q_1H, q_2H,
-                                        q_3H, q_4H, is_over_time, is_win_home, points_final_away, q_1A, q_2A, q_3A, q_4A)
+                                        q_3H, q_4H, is_over_time, is_win_home, points_final_away, q_1A, q_2A, q_3A, q_4A,
+                                        time_quarter)
 
                         count_match += 1
+
+                        del list_names_teams, date_match, points_final_home, q_1H, q_2H, q_3H, q_4H, \
+                            is_over_time, is_win_home, points_final_away, q_1A, q_2A, q_3A, q_4A, time_quarter
 
                     except Exception as e:
                         print(f'X*X*X*X* EXCEPTION X*X*X*X*\n\tIn SENDING DATA TO BD\n {e}')
@@ -194,6 +210,9 @@ def catch_data(list_links_leagues):
             print(f'X*X*X*X* EXCEPTION X*X*X*X*\n\tGET A LOAD DATA TO EACH LEAGUE \n {e}')
 
         finally:
+            # Enviar data a "t_gral_statistics"
+            prepare_data_for_statistics_all_teams(current_id_league)
+
             print('''Final historial de partidos de la liga actual.
             Iniciar nueva DATA COLLECTION con la siguiente liga.''')
 

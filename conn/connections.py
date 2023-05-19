@@ -5,9 +5,9 @@ from conn.conn_functions_shared import insert_row
 # ==================================================================================================================== #
 # TABLE "analysis_basketball.leagues"                                                                                  #
 # ==================================================================================================================== #
-def conn_db_table_leagues(id_league, name_league):
-    query = f'''INSERT INTO leagues (id_league, name_league) 
-                VALUES ({id_league}, '{name_league}')'''
+def conn_db_table_leagues(id_league, name_league,new_tab_open):
+    query = f'''INSERT INTO leagues (id_league, name_league, link_league) 
+                VALUES ({id_league}, '{name_league}', '{new_tab_open}')'''
     insert_row(query=query)
 
     print('Executed TABLE "leagues".')
@@ -69,20 +69,35 @@ def conn_db_table_teams_has_matches(teams_id_team, matches_id_match):
 
 
 # ==================================================================================================================== #
+# TABLE "analysis_basketball.teams"                                                                                    #
+# ==================================================================================================================== #
+def conn_db_table_match_statistics(teams_id_team, matches_id_match, avg_match, avg_q1, avg_q2,
+                                   avg_q3, avg_q4):
+    query = f'''INSERT INTO match_statistics (teams_id_team, matches_id_match, avg_match, avg_q1_match, avg_q2_match, 
+                avg_q3_match, avg_q4_match) VALUES ({teams_id_team}, {matches_id_match}, {avg_match}, {avg_q1}, {avg_q2}, 
+                {avg_q3}, {avg_q4})'''
+    insert_row(query=query)
+
+    print('Executed TABLE "match_statistics".')
+# END --------- TABLE "analysis_basketball.teams"                                                                  # # #
+# ==================================================================================================================== #
+
+
+# ==================================================================================================================== #
 # SEN DATA TABLE STATISTICS                                                                                            #
 # ==================================================================================================================== #
-def conn_insert_table_statistics(id_statistics, id_teams_id_team, id_leagues_id_league, avg_gral, mdn_gral, max_gral,
-                                 min_gral, avg_h, mdn_h, max_h, min_h, avg_a, mdn_a, max_a, min_a, avg_q1_h, mdn_q1_h,
-                                 max_q1_h, min_q1_h, avg_q2_h, mdn_q2_h, max_q2_h, min_q2_h, avg_q3_h, mdn_q3_h, max_q3_h,
-                                 min_q3_h, avg_q4_h, mdn_q4_h, max_q4_h, min_q4_h, avg_q1_a, mdn_q1_a, max_q1_a, min_q1_a,
-                                 avg_q2_a, mdn_q2_a, max_q2_a, min_q2_a, avg_q3_a, mdn_q3_a, max_q3_a, min_q3_a, avg_q4_a,
-                                 mdn_q4_a, max_q4_a, min_q4_a):
+def conn_insert_table_gral_statistics(id_statistics, teams_id_team, leagues_id_league, avg_gral, mdn_gral, max_gral,
+                                      min_gral, avg_h, mdn_h, max_h, min_h, avg_a, mdn_a, max_a, min_a, avg_q1_h,
+                                      mdn_q1_h, max_q1_h, min_q1_h, avg_q2_h, mdn_q2_h, max_q2_h, min_q2_h, avg_q3_h,
+                                      mdn_q3_h, max_q3_h, min_q3_h, avg_q4_h, mdn_q4_h, max_q4_h, min_q4_h, avg_q1_a,
+                                      mdn_q1_a, max_q1_a, min_q1_a, avg_q2_a, mdn_q2_a, max_q2_a, min_q2_a, avg_q3_a,
+                                      mdn_q3_a, max_q3_a, min_q3_a, avg_q4_a, mdn_q4_a, max_q4_a, min_q4_a):
 
-    query = f'''INSERT INTO statistics (id_statistics, id_teams_id_team, id_leagues_id_league, avg_gral, mdn_gral, max_gral, 
+    query = f'''INSERT INTO gral_statistics (id_statistics, teams_id_team, leagues_id_league, avg_gral, mdn_gral, max_gral, 
     min_gral, avg_h, mdn_h, max_h, min_h, avg_a, mdn_a, max_a, min_a, avg_q1_h, mdn_q1_h, max_q1_h, min_q1_h, avg_q2_h, 
     mdn_q2_h, max_q2_h, min_q2_h, avg_q3_h, mdn_q3_h, max_q3_h, min_q3_h, avg_q4_h, mdn_q4_h, max_q4_h, min_q4_h, avg_q1_a, 
     mdn_q1_a, max_q1_a, min_q1_a, avg_q2_a, mdn_q2_a, max_q2_a, min_q2_a, avg_q3_a, mdn_q3_a, max_q3_a, min_q3_a, avg_q4_a, 
-    mdn_q4_a, max_q4_a, min_q4_a) VALUES ({id_statistics}, {id_teams_id_team}, {id_leagues_id_league}, {avg_gral}, 
+    mdn_q4_a, max_q4_a, min_q4_a) VALUES ({id_statistics}, {teams_id_team}, {leagues_id_league}, {avg_gral}, 
     {mdn_gral}, {max_gral}, {min_gral}, {avg_h}, {mdn_h}, {max_h}, {min_h}, {avg_a}, {mdn_a}, {max_a}, {min_a}, {avg_q1_h}, 
     {mdn_q1_h}, {max_q1_h}, {min_q1_h}, {avg_q2_h}, {mdn_q2_h}, {max_q2_h}, {min_q2_h}, {avg_q3_h}, {mdn_q3_h}, {max_q3_h}, 
     {min_q3_h}, {avg_q4_h}, {mdn_q4_h}, {max_q4_h}, {min_q4_h}, {avg_q1_a}, {mdn_q1_a}, {max_q1_a}, {min_q1_a},  {avg_q2_a}, 
