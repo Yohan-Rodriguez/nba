@@ -43,11 +43,11 @@ def conn_db_table_teams_has_leagues(teams_id_team, leagues_id_league):
 # ==================================================================================================================== #
 # TABLE "analysis_basketball.teams"                                                                                    #
 # ==================================================================================================================== #
-def conn_db_table_matches(id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4, over_time, is_win):
+def conn_db_table_matches(id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4, over_time, is_win, points_difference):
 
-    query = f'''INSERT INTO matches (id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4, over_time, is_win) 
-                VALUES ({id_match}, '{date_match}', {is_home}, {total_points}, {q_1}, {q_2}, {q_3}, {q_4}, {over_time}, 
-                {is_win})'''
+    query = f'''INSERT INTO matches (id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4, over_time, is_win,
+                points_difference) VALUES ({id_match}, '{date_match}', {is_home}, {total_points}, {q_1}, {q_2}, {q_3}, 
+                {q_4}, {over_time}, {is_win}, {points_difference})'''
     insert_row(query=query)
 
     print('Executed TABLE "matches".')
@@ -71,10 +71,10 @@ def conn_db_table_teams_has_matches(teams_id_team, matches_id_match):
 # ==================================================================================================================== #
 # TABLE "analysis_basketball.teams"                                                                                    #
 # ==================================================================================================================== #
-def conn_db_table_match_statistics(teams_id_team, matches_id_match, avg_match, avg_q1, avg_q2,
+def conn_db_table_match_statistics(matches_id_match, avg_match, avg_q1, avg_q2,
                                    avg_q3, avg_q4):
-    query = f'''INSERT INTO match_statistics (teams_id_team, matches_id_match, avg_match, avg_q1_match, avg_q2_match, 
-                avg_q3_match, avg_q4_match) VALUES ({teams_id_team}, {matches_id_match}, {avg_match}, {avg_q1}, {avg_q2}, 
+    query = f'''INSERT INTO match_statistics (matches_id_match, avg_match, avg_q1_match, avg_q2_match, 
+                avg_q3_match, avg_q4_match) VALUES ({matches_id_match}, {avg_match}, {avg_q1}, {avg_q2}, 
                 {avg_q3}, {avg_q4})'''
     insert_row(query=query)
 

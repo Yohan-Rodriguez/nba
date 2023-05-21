@@ -7,7 +7,7 @@ import mysql.connector
 host_default = 'localhost'
 user_default = 'root'
 pass_default = 'admin'
-database_default = 'analysis_basketball_2'
+database_default = 'analysis_basketball'
 # END: Atributos                                                                                                   # # #
 # ==================================================================================================================== #
 

@@ -232,8 +232,7 @@ def calculate_statistics_all_teams_in_unique_league(result_data, id_league):
         except Exception as e:
             print(f'EXCEPTION IN send data to "t_gral_tatatistics"\n{e}')
 
-        finally:
-            list_statistics_teams.clear()
+    list_statistics_teams.clear()
 # END --------- CALCULATE STATISTICS                                                                               # # #
 # # ================================================================================================================== #
 

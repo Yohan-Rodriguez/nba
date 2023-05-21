@@ -9,3 +9,5 @@
 9) Separar funcionalidad de calcular estadísticas a ver estadísticas.
 10) Realizar digrama de relación entre funciones y modulos.
 11) Optimizar código elimiando código duplicado.
+12) ¿Por qué me retorna muchos 1 lav,dsvdvsdfb.........?
+

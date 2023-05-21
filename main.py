@@ -8,6 +8,7 @@ from history_match.update_history import catch_data as update_data
 from conn.conn_functions_shared import select_row as fs_select_row
 from statistics_dir.calculate_statistics import prepare_data_for_statistics_one_team, show_statistics
 from statistics_dir.calculate_statistics import prepare_data_for_statistics_all_teams
+from statistics_dir.statistic_analysis import analysis_x_teams
 from statistics_dir.statistics_functions_shared import show_options, see_options
 
 
@@ -29,7 +30,7 @@ def new_league_history():
                           # 'https://www.flashscore.co/baloncesto/puerto-rico/bsn/resultados/',
                           'https://www.flashscore.co/baloncesto/republica-checa/nbl/resultados/',
                           'https://www.flashscore.co/baloncesto/rumania/divizia-a/resultados/',
-                          'https://www.flashscore.co/baloncesto/usa/nba/resultados/'
+                          # 'https://www.flashscore.co/baloncesto/usa/nba/resultados/'
     ]
     load_data(list_links_leagues)
 # END --------- LOAD NEW DATA TO HISTORY.                                                                          # # #
@@ -153,9 +154,9 @@ def see_forecast():
 # ==================================================================================================================== #
 # FUNCTIONS CALLS                                                                                                      #
 # ==================================================================================================================== #
-# Cargar nueva data al historial de equipos y sus estadísticas en cada liga,
-# para guardar en la base de datos.
-new_league_history()
+# # Cargar nueva data al historial de equipos y sus estadísticas en cada liga,
+# # para guardar en la base de datos.
+# new_league_history()
 
 
 # # Actualizar historial de equipos y sus estadísticas en cada liga,
@@ -180,3 +181,7 @@ new_league_history()
 # prepare_data_for_statistics_one_team(id_league=2559, name_team='Milwaukee Bucks')
 
 # prepare_data_for_statistics_all_teams(5722)
+id_league = 8423
+name_home = 'CSM Oradea'
+name_away = 'CSU Sibiu'
+analysis_x_teams(id_league, name_home, name_away)

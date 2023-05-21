@@ -83,10 +83,7 @@ def catch_data(list_links_leagues):
         # Obtener la data de todos los partidos cargados en el DIV
         try:
             div_data = driver.find_element(By.CSS_SELECTOR, '#live-table > div.event.event--results > div > div').text.splitlines()
-                                                           # #live-table > div.event.event--results > div > div
-                                                           # #live-table > div.event.event--results > div > div
 
-            print(div_data)
         except Exception as e:
             print(f'X*X*X*X* EXCEPTION X*X*X*X*\n\tIN: GET A LOAD DATA TO LEAGUE\n{e}')
 
