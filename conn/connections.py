@@ -43,11 +43,12 @@ def conn_db_table_teams_has_leagues(teams_id_team, leagues_id_league):
 # ==================================================================================================================== #
 # TABLE "analysis_basketball.teams"                                                                                    #
 # ==================================================================================================================== #
-def conn_db_table_matches(id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4, over_time, is_win, points_difference):
+def conn_db_table_matches(id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4, over_time, is_win, points_diff_q3,
+                          points_diff_final):
 
     query = f'''INSERT INTO matches (id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4, over_time, is_win,
-                points_difference) VALUES ({id_match}, '{date_match}', {is_home}, {total_points}, {q_1}, {q_2}, {q_3}, 
-                {q_4}, {over_time}, {is_win}, {points_difference})'''
+                points_diff_q3, points_diff_final) VALUES ({id_match}, '{date_match}', {is_home}, {total_points}, {q_1},
+                {q_2}, {q_3}, {q_4}, {over_time}, {is_win}, {points_diff_q3}, {points_diff_final})'''
     insert_row(query=query)
 
     print('Executed TABLE "matches".')

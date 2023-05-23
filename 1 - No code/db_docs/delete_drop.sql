@@ -1,8 +1,6 @@
-USE analysis_basketball;
-
-
 # ----------------------------------  
-# DROP DATABASE test_mis_marcadores;
+# DROP DATABASE analysis_basketball_2;
+# DROP DATABASE analysis_basketball_3;
 # ----------------------------------  
 
 # ----------------------------------  
@@ -19,8 +17,8 @@ USE analysis_basketball;
 
 # ----------------------------------  
 # DELETE FROM gral_statistics;
- DELETE FROM gral_statistics
- WHERE leagues_id_league = 5722;
+# DELETE FROM gral_statistics
+# WHERE leagues_id_league = 5722;
 # ----------------------------------  
 
 

@@ -11,10 +11,11 @@ from check_db_and_controllers.check_data_in_db import check_name_team as ck_name
 # Función para enviar los datos a "t_teams" y "t_matches"                                                              #
 # ==================================================================================================================== #
 def send_data_to_teams_and_matches(teams_id_team, id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4,
-                                   over_time, is_win, time_x_quarter, points_difference, home_or_away_2):
+                                   over_time, is_win, time_x_quarter, points_diff_q3, points_diff_final, home_or_away_2):
     # Enviar data a "t_matches"
     print(f'Sending data to "analysis_basketball.matches" for {home_or_away_2}.')
-    conn_db_matches(id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4, over_time, is_win, points_difference)
+    conn_db_matches(id_match, date_match, is_home, total_points, q_1, q_2, q_3, q_4, over_time, is_win, points_diff_q3,
+                    points_diff_final)
 
     # Enviar data a "t_teams_has_matches"
     print(f'Sending data to "analysis_basketball.teams_has_matches" for {home_or_away_2}.')
@@ -80,7 +81,8 @@ def get_id_league_currently(name_league):
 def send_data_to_db(list_names_teams, current_id_league, date_match, points_final_home, q_1H, q_2H, q_3H, q_4H,
                     is_over_time, is_win_home, points_final_away, q_1A, q_2A, q_3A, q_4A, time_quarter):
 
-    points_difference = (q_1H + q_2H + q_3H) - (q_1A + q_2A + q_3A)
+    points_diff_q3 = (q_1H + q_2H + q_3H) - (q_1A + q_2A + q_3A)
+    points_diff_final = (q_1H + q_2H + q_3H + q_4H) - (q_1A + q_2A + q_3A + q_4A)
 
     # 2 repeticiones:
     # i_send_data_t_team == 0 para home y
@@ -97,14 +99,14 @@ def send_data_to_db(list_names_teams, current_id_league, date_match, points_fina
         if i_send_data_t_team == 0:
             # Enviar data de home a "t_matches"
             send_data_to_teams_and_matches(teams_id_team, id_match, date_match, True, points_final_home, q_1H, q_2H,
-                                           q_3H, q_4H, is_over_time, is_win_home, time_quarter, points_difference,
-                                           i_send_data_t_team)
+                                           q_3H, q_4H, is_over_time, is_win_home, time_quarter, points_diff_q3,
+                                           points_diff_final, i_send_data_t_team)
 
         elif i_send_data_t_team == 1:
             # Enviar data de away a "t_team" y a "t_matches"
             send_data_to_teams_and_matches(teams_id_team, id_match, date_match, False, points_final_away, q_1A, q_2A,
-                                           q_3A, q_4A, is_over_time, not is_win_home, time_quarter, points_difference*(-1),
-                                           i_send_data_t_team)
+                                           q_3A, q_4A, is_over_time, not is_win_home, time_quarter, points_diff_q3*(-1),
+                                           points_diff_final*(-1), i_send_data_t_team)
 
     print('Completed Finish match -----------------------------')
 # END --------- SENDING DATA TO BD                                                                                 # # #

@@ -1,3 +1,26 @@
+ANÁLISIS ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+*-* Para el equipo 1:
+	* Identificar valores de la var_dep que son superiores, iguales o minimamente inferiores (máximo -0.03 unidades) a sus valores predichos.
+	* Calcular las magnitudes de la diferencia entre var_dep (ej: Avg_Match) y var_ind (ej: Avg_Q1_Q3).
+	* Identificar las magnitudes positivas o iguales a 0.
+	* Calcular diferencia entre el pronostico y la var_ind (ej: Avg_Q1_Q3). Esto me dara la exigencia que pide el pronostico sobre la variable independiente.
+	* Calcular los puntos o límites de operación de cada observación sobre la linea de tendencia de la regresión lineal simple: pronostico - sdt_error hasta pronostico + sdt_error.
+	* Determinar la distribución de la Diff_Q3 (Valores altos negativos y altos positivos, y valores cercanos a 0).
+	* Determinar la distribución de los datos de la var_ind por medio de la media,. la mediana, el sdt_error, quantiles o percentiles, y la distribución normal.
+
+	* Analizar los datos obtenidos para determinar parámetros que aporten significativamente a la explicación del por qué se da un resultados dado en la var_dep.
+
+*-* Realizar el mismo analisis sobre el equipo número 2.
+
+*-* Analizar conjuntamente los datos del equipo 1 y el equipo 2.
+
+*-* Legar al objetivo de obtener el pronostico para el partido en vivo, junto a su probabilidad calculada de que se cumpla el pronostico dado.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
 1) Investigar sobre el error fatal de Garbage Colletor.
 2) Usar la tabla "links_leagues".
 3) Diseñar el formato de mostrar las estadísticas de un partido en vivo. 
