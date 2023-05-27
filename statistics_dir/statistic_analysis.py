@@ -1,3 +1,4 @@
+import numpy as np
 from conn.conn_functions_shared import select_row as fs_select_row
 import pandas as pd
 import statsmodels.api as sm
@@ -6,30 +7,12 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 
 
+pd.options.display.max_rows = None
+pd.options.display.max_columns = None
 # ==================================================================================================================== #
 #                                                                                                   #
 # ==================================================================================================================== #
 def cal_analysis_statistic(df_get_statistics, name_team, is_home=2):
-    # ================================================================================================================ #
-    # CALCULATE DF_NORMALIZED                                                                                          #
-    # ================================================================================================================ #
-    def get_df_temp(df_temp):
-        # Seleccionar solo las columnas numéricas
-        columns_to_normalize = df_temp.columns[df_temp.dtypes != object]
-
-        # Normalización min-max en las columnas numéricas
-        df_temp_normalized = (df_temp[columns_to_normalize] - df_temp[columns_to_normalize].min()) / (
-                              df_temp[columns_to_normalize].max() - df_temp[columns_to_normalize].min())
-
-        df_temp_normalized = df_temp_normalized.round(5)
-
-        # Concatenar la columna de nombres con el DataFrame normalizado
-        df_temp_normalized = pd.concat([df_temp['Name_Team'], df_temp_normalized], axis=1)
-
-        return df_temp_normalized
-    # END --------- CALCULATE DF_NORMALIZED                                                                        # # #
-    # ================================================================================================================ #
-
     # Diccionario para almacenar las correlaciones fuertes una sola llamada de la función "cal_corr"
     dict_corr_temp = {}
 
@@ -50,9 +33,6 @@ def cal_analysis_statistic(df_get_statistics, name_team, is_home=2):
         # Dataframe temporal con las columnas necesarias para la solicitud a la llamada de la función "cal_analysis_statistic()"     
         df_temp = df_get_statistics[(df_get_statistics['Name_Team'] == f'{name_team}') & (df_get_statistics['Is_Home'] == is_home)]
 
-        # Obtener el DataFrame normalizado con base en "df_temp" para los equipos Home y Away.
-        df_temp_normalized = get_df_temp(df_temp)
-
     # Sí al llamar la función "cal_analysis_statistic()" se solicita análisis estadístico 
     # del "name_team" indistintamente de "is_home" (todos los resultados)
     elif is_home == 2:
@@ -61,9 +41,6 @@ def cal_analysis_statistic(df_get_statistics, name_team, is_home=2):
         # Dataframe temporal con las columnas necesarias para la solicitud a la llamada de la función "cal_analysis_statistic()"     
         df_temp = df_get_statistics[df_get_statistics['Name_Team'] == f'{name_team}']
 
-        # Obtener el DataFrame normalizado con base en "df_temp" para los equipos Home y Away.
-        df_temp_normalized = get_df_temp(df_temp)
-
     # END --------- DESIGN DATAFRAMES                                                                              # # #
     # ================================================================================================================ #
 
@@ -71,18 +48,19 @@ def cal_analysis_statistic(df_get_statistics, name_team, is_home=2):
     # ANALYSIS STATISTIC AND VISUALIZATION                                                                              #
     # ================================================================================================================ #
     # Análizar orrelaciones entre variables independientes con las variables dependientes del equipo local.
-    list_columns_ind = ['Avg_Q1_to_Q3', 'Avg_Q1', 'Avg_Q2', 'Avg_Q3', 'DIFF_Q3', 'Is_Home']
-    list_columns_dep = ['Avg_Q4', 'Avg_Match']
+    list_columns_ind = ['Avg_Q1', 'Avg_Q2', 'Avg_Q3', 'Avg_Q1_to_Q3', 'DIFF_Q3']
+    list_columns_dep = ['Avg_Q4', 'Avg_Match', 'Is_Home', 'DIFF_Q3', 'Avg_Q1_to_Q3', 'Avg_Q3', 'Avg_Q2']
 
     # Iterar sobre variables independientes.
     for i_ind in list_columns_ind:
+        
         # Iterar sobre variables dependientes
-        for j_dep in list_columns_dep:
+        for j_dep in list_columns_dep:            
             # Calcular correlación con máximo 7 decimas
             corr_temp = round(df_temp[i_ind].corr(df_temp[j_dep]), 7)
 
             # Sí la correlación calculada es fuerte:
-            if (corr_temp >= 0.75) or (corr_temp <= -0.75):
+            if ((corr_temp >= 0.7) or (corr_temp <= -0.7)) and (i_ind != j_dep):
                 # Agregar correlación al diccionario "dict_corr_temp{}"
                 dict_corr_temp[f'Corr_pearson ({i_ind} - {j_dep})'] = corr_temp
 
@@ -131,18 +109,64 @@ def cal_analysis_statistic(df_get_statistics, name_team, is_home=2):
                 # Obtener el estadístico t
                 t_statistic = round(results.tvalues[1], 7)
                 dict_corr_temp[f't_statistic - ({i_ind} - {j_dep})'] = t_statistic
+                
+                # # Obtener media
+                # mean_jdep = df_temp[j_dep].mean()
+                # median_jdep = df_temp[j_dep].median()
+                # mode_jdep = df_temp[j_dep].mode()
+                # std_jdep = df_temp[j_dep].std()                
 
                 # ==================================================================================================== #
                 # PERZONALIZED DATAFRAME FOR GRAPHICS                                                                  #
                 # ==================================================================================================== #
-                df_graphic = pd.DataFrame({f'{i_ind}_normd': df_temp_normalized[i_ind], f'{j_dep}_normd': df_temp_normalized[j_dep],
-                                           f'{i_ind}': df_temp[i_ind], f'{j_dep}': df_temp[j_dep], 
-                                          'Predicted': y_pred, 'DIFF_Q3': df_temp['DIFF_Q3'], 'DIFF_F': df_temp['DIFF_F'], 'Residuals': residuals,
-                                          'Is_Win': df_temp['Is_Win']})
+                dict_df_graphic = {f'{i_ind}': df_temp[i_ind], 
+                                    f'{j_dep}': df_temp[j_dep], 
+                                    'Predicted': y_pred, 
+                                    'Predicted_ok?': df_temp[j_dep] >= (y_pred - 0.03),
+                                    '+Area_1std': y_pred + std_error,
+                                    '-Area_1std': y_pred - std_error,
+                                    '+Area_2std': y_pred + 2*std_error,
+                                    '-Area_2std': y_pred - 2*std_error,
+                                    '+Area_3std': y_pred + 3*std_error,
+                                    '-Area_3std': y_pred - 3*std_error,
+                                    'Ouliers': (df_temp[j_dep]-y_pred) / std_error,
+                                    'Cumulative_Prob': df_temp['Avg_Match'].cumsum() / df_temp['Avg_Match'].sum(),
+                                    'Probability_Density': stats.norm.pdf(df_temp['Avg_Match'], df_temp['Avg_Match'].mean(), df_temp['Avg_Match'].std()),
+                                    'DIFF_Q3': df_temp['DIFF_Q3'], 
+                                    'DIFF_F': df_temp['DIFF_F'], 
+                                    'Residuals': residuals,
+                                    'Is_Win': df_temp['Is_Win']
+                                    }
                 
-                print('\n')
-                print(df_graphic[[f'{i_ind}_normd', f'{j_dep}_normd']])
-                print(df_graphic[[f'{i_ind}', f'{j_dep}', 'Predicted', 'DIFF_Q3', 'DIFF_F', 'Residuals', 'Is_Win']])
+                df_graphic = pd.DataFrame(data=dict_df_graphic)
+                              
+                conditions = [(df_temp[j_dep] <= df_graphic['+Area_1std']) & (df_temp[j_dep] >= df_graphic['-Area_1std']),
+                              ((df_temp[j_dep] >= df_graphic['-Area_2std']) & (df_temp[j_dep] < df_graphic['-Area_1std'])) 
+                              | ((df_temp[j_dep] <= df_graphic['+Area_2std']) & (df_temp[j_dep] > df_graphic['+Area_1std'])),
+                              ((df_temp[j_dep] >= df_graphic['-Area_3std']) & (df_temp[j_dep] < df_graphic['-Area_2std'])) 
+                              | ((df_temp[j_dep] <= df_graphic['+Area_3std']) & (df_temp[j_dep] > df_graphic['+Area_2std'])),
+                              (df_temp[j_dep] > df_graphic['+Area_3std']) | (df_temp[j_dep] < df_graphic['-Area_3std']) 
+                             ]
+                
+                choices = [1, 2, 3, 4]
+                
+                df_graphic['Area'] = np.select(conditions, choices, default=0)
+                
+                Area_1 = len(df_graphic[df_graphic['Area'] == 1])
+                Area_2 = len(df_graphic[df_graphic['Area'] == 2])
+                Area_3 = len(df_graphic[df_graphic['Area'] == 3])
+                Area_4 = len(df_graphic[df_graphic['Area'] == 4])
+                
+                print(Area_1, Area_2, Area_3, Area_4)
+                
+                # list_see_columns_df_graphic =  ['DIFF_F', 'DIFF_Q3', f'{i_ind}', f'{j_dep}', 'Predicted', 'Predicted_ok?', 'Ouliers', 
+                #                                 'Cumulative_Prob', 'Probability_Density', 'Residuals', 'Is_Win', 'Area']
+                
+                list_see_columns_df_graphic =  [f'{i_ind}', f'{j_dep}', '+Area_1std', '-Area_1std', 'Area']
+                
+                print(f'\n\n{name_team} y {str_is_home}: {i_ind} - {j_dep}')
+                # print(f'\nMean {j_dep}: {mean_jdep}\nMedina {j_dep}: {median_jdep}\nMode {j_dep}: {mode_jdep}\nSTD {j_dep}: {std_jdep}\n')
+                print(df_graphic[list_see_columns_df_graphic])
                 # END --------- PERZONALIZED DATAFRAME FOR GRAPHICS                                                # # #
                 # ==================================================================================================== #
 
@@ -150,35 +174,68 @@ def cal_analysis_statistic(df_get_statistics, name_team, is_home=2):
                 # VISUALIZATION                                                                                        #
                 # ==================================================================================================== #
                 # Crear figura uno que contiene la gráfica.
-                fig_1, ax = plt.subplots()
+                fig_1, (ax, ax_2)= plt.subplots(1, 2, sharex=False, sharey=False)
                 
                 # Crear una figura con un nombre personalizado
                 fig_1.canvas.manager.set_window_title(f'{name_team} - {str_is_home}')
-
-                # Crear gráfico  de dispersión con Seaborn, con los datos normalizados.
-                sns.regplot(x=df_temp_normalized[i_ind], y=df_temp_normalized[j_dep], data=df_temp_normalized[[i_ind, j_dep]],
-                            scatter_kws={'color': 'blue'}, line_kws={'color': 'red'}, ax=ax)
-
+                
+                # Personalizar el tamaño de cada subplot
+                # [x, y, width, heigth]
+                ax.set_position([0.1, 0.1, 0.6, 0.8])  # Posición y tamaño del primer subplot
+                ax_2.set_position([0.7, 0.1, 0.1, 0.8])  # Posición y tamaño del segundo subplot
+                
                 # Calcular la ecuación de la recta
-                slope, intercept_normalized, _, p_value, _ = stats.linregress(x=df_temp_normalized[i_ind], y=df_temp_normalized[j_dep])
-                equation = f'y = {slope:.2f}x + {intercept_normalized:.2f}'
+                # slope, intercept, _, p_value, _ = stats.linregress(x=df_temp[i_ind], y=df_temp[j_dep])
+                _, _, _, p_value, _ = stats.linregress(x=df_temp[i_ind], y=df_temp[j_dep])
+                equation = f'{j_dep} = {b1:.2f}{i_ind} + {intercept:.3f}'     
+                
+                # Calcular el rango entre y - std y y + std
+                y_j_dep = intercept + b1 * df_temp[i_ind]
+                range_lower_1 = y_j_dep - std_error
+                range_upper_1 = y_j_dep + std_error
+                range_lower_2 = range_lower_1 - std_error
+                range_upper_2 = range_upper_1 + std_error
 
+                # Dibujar la primera área sombreada (1 sdt de distancia a la line de tendencia "y = mx + b")
+                ax.fill_between(df_temp[i_ind], range_lower_1, range_upper_1, alpha=1, color='#bef202')                
+                
+                # num_point_1_sdt = 
+
+                # Dibujar la segunda área sombreada (2 sdt de distancia a la line de tendencia "y = mx + b")
+                ax.fill_between(df_temp[i_ind], range_lower_2, range_upper_2, alpha=0.3, color='#fea304')  
+
+                # Dibujar la tercera área sombreada (2 sdt de distancia a la line de tendencia "y = mx + b")
+                ax.fill_between(df_temp[i_ind], range_lower_2-std_error, range_upper_2+std_error, alpha=0.2, color='#b6ff00')                               
+                
+                # Crear gráfico  de dispersión con Seaborn
+                sns.regplot(x=df_temp[i_ind], y=df_temp[j_dep], ci=None, data=df_temp[[i_ind, j_dep]],
+                            scatter_kws={'color': 'blue'}, line_kws={'color': '#f5061d'}, ax=ax)
+                
                 # Leyenda en la parte superior de la gráfica
-                msn_one_graphics = f'Equation: {equation}\nCorr_Pearson: {corr_temp}\nR²: {r_squared}\nAdjusted R²: {adjusted_r_squared}' \
-                                   f'\nSTD_error: {std_error}'
+                msn_one_graphics = f'{equation}'
 
                 # Leyenda en la parte inferior de la gráfica
-                msn_two_graphics = f'\nIntercept: {intercept}\nb1: {b1}\nt statistic: {t_statistic}\nP value: {round(p_value, 7)}' \
+                msn_two_graphics = f'\nCorr_Pearson: {corr_temp}\nR²: {r_squared}\nAdjusted R²: {adjusted_r_squared}\nSTD_error: {std_error}'\
+                                   f'\nIntercept: {intercept}\nb1: {b1}\nt statistic: {t_statistic}\nP value: {round(p_value, 7)}'\
                                    f'\nAvg Residuals: {round(df_graphic["Residuals"].median(), 7)}'
-
+                
                 # Agregar la ecuación de la recta al gráfico
-                ax.text(0.01, 0.73, msn_one_graphics, ha='left')
-                ax.text(0.61, min(df_temp_normalized[j_dep]), msn_two_graphics, ha='left')
+                point_x = ((max(df_temp[i_ind]) - min(df_temp[i_ind])) / 8) * 3
+                lim_x = (max(df_temp[i_ind]) - min(df_temp[i_ind])) / df_temp[i_ind].count()
+                lim_y = (max(df_temp[j_dep]) - min(df_temp[j_dep])) / df_temp[j_dep].count()
+                max_lim_x = max(df_temp[i_ind])
+                min_lim_x = min(df_temp[i_ind])
+                max_lim_y = max(df_temp[j_dep]) + lim_y
+                min_lim_y = min(df_temp[j_dep]) - lim_y
+                
+                ax_2.axis('off')
+                ax.text((min_lim_x + (min_lim_x * 0.015)), (max_lim_y - (max_lim_y*0.1)), msn_one_graphics, ha='left')
+                ax_2.text(0.1, 0, msn_two_graphics, ha='left')
                 ax.set_xlabel(i_ind)
                 ax.set_ylabel(j_dep)
                 ax.set_title(f'{name_team} - {str_is_home}')
-                ax.set_xlim(-0.05, 1.05)
-                ax.set_ylim(-0.05, 1.05)
+                ax.set_xlim((min(df_temp[i_ind]) - lim_x), (max(df_temp[i_ind]) + lim_x))
+                ax.set_ylim((min(df_temp[j_dep]) - lim_y), (max(df_temp[j_dep]) + lim_y))
                 # Cuadrícula solo en la figura del la gráfica
                 ax.grid()
 
@@ -216,6 +273,8 @@ def cal_analysis_statistic(df_get_statistics, name_team, is_home=2):
                 plt.show()
                 # END --------- VISUALIZATION                                                                      # # #
                 # ==================================================================================================== #
+                
+        list_columns_dep.pop(-1)
     # END --------- ANALYSIS STATISTIC AND VISUALIZATION                                                           # # #
     # ================================================================================================================ #
 
@@ -235,7 +294,7 @@ def analysis_x_teams(id_league, name_home, name_away):
         query = f'''SELECT  teams.name_team,			
                             matches.is_home,
                             matches.is_win,
-                            (match_statistics.avg_q1_match + match_statistics.avg_q2_match + match_statistics.avg_q3_match)/3,
+                            (match_statistics.avg_q1_match + match_statistics.avg_q2_match + match_statistics.avg_q3_match)/3 AS Avg_Q1_To_Q3,
                             match_statistics.avg_q1_match,
                             match_statistics.avg_q2_match,
                             match_statistics.avg_q3_match,
@@ -250,7 +309,7 @@ def analysis_x_teams(id_league, name_home, name_away):
                     JOIN teams_has_leagues ON teams.id_team = teams_has_leagues.teams_id_team  
                     WHERE teams.name_team IN ("{name_home}", "{name_away}") 
                       AND teams_has_leagues.leagues_id_league = {id_league}
-                    ORDER BY match_statistics.avg_match'''
+                    ORDER BY Avg_Q1_To_Q3'''
 
         result_data_statistics = fs_select_row(query)
         del query
@@ -263,31 +322,31 @@ def analysis_x_teams(id_league, name_home, name_away):
         # DataFrame.
         df_get_statistics = pd.DataFrame(data=result_data_statistics, columns=list_columns)
 
-        # Análisis y datos estadísticos de Home sin importar si fue local o visitante.
-        home_h_a = cal_analysis_statistic(df_get_statistics, name_home)
+        # # Análisis y datos estadísticos de Home sin importar si fue local o visitante.
+        # home_h_a = cal_analysis_statistic(df_get_statistics, name_home)
 
-        # Análisis y datos estadísticos de Home sí fue local.
-        home_h = cal_analysis_statistic(df_get_statistics, name_home, is_home=1)
+        # # Análisis y datos estadísticos de Home sí fue local.
+        # home_h = cal_analysis_statistic(df_get_statistics, name_home, is_home=1)
 
-        # Análisis y datos estadísticos de Home sí fue visitante.
-        home_a = cal_analysis_statistic(df_get_statistics, name_home, is_home=0)
+        # # Análisis y datos estadísticos de Home sí fue visitante.
+        # home_a = cal_analysis_statistic(df_get_statistics, name_home, is_home=0)
 
-        # Análisis y datos estadísticos de Away sin importar si fue local o visitante.
-        away_h_a = cal_analysis_statistic(df_get_statistics, name_away)
+        # # Análisis y datos estadísticos de Away sin importar si fue local o visitante.
+        # away_h_a = cal_analysis_statistic(df_get_statistics, name_away)
 
-        # Análisis y datos estadísticos de Away sí fue local.
-        away_h = cal_analysis_statistic(df_get_statistics, name_away, is_home=1)
+        # # Análisis y datos estadísticos de Away sí fue local.
+        # away_h = cal_analysis_statistic(df_get_statistics, name_away, is_home=1)
 
         # Análisis y datos estadísticos de Away sí fue visitante.
         away_a = cal_analysis_statistic(df_get_statistics, name_away, is_home=0)
 
-        # Agregar las correlaciones de cada llamada a la función "cal_corr()", que son fuertes (corr > a 0.75 o corr > -0.75)
-        dict_corr_teams = {'home_h_a': home_h_a,
-                           'home_h': home_h,
-                           'home_a': home_a,
-                           'away_h_a': away_h_a,
-                           'away_h': away_h,
-                           'away_a': away_a}
+        # # Agregar las correlaciones de cada llamada a la función "cal_corr()", que son fuertes (corr > a 0.75 o corr > -0.75)
+        # dict_corr_teams = {'home_h_a': home_h_a,
+        #                     'home_h': home_h,
+        #                     'home_a': home_a,
+        #                     'away_h_a': away_h_a,
+        #                     'away_h': away_h,
+        #                     'away_a': away_a}
 
         # for i in dict_corr_teams:
         #     print(i, dict_corr_teams[i])

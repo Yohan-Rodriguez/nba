@@ -181,7 +181,7 @@ def see_forecast():
 # prepare_data_for_statistics_one_team(id_league=2559, name_team='Milwaukee Bucks')
 
 # prepare_data_for_statistics_all_teams(5722)
-id_league = 8696
-name_home = 'CSM Oradea'
-name_away = 'CSU Sibiu'
+id_league = 8122
+name_home = 'Nymburk'
+name_away = 'Pardubice'
 analysis_x_teams(id_league, name_home, name_away)

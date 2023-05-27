@@ -1,5 +1,11 @@
 ANÁLISIS ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *-* Para el equipo 1:
+	* Calcular media, mediana y posible moda.
+	* Calcular frecuencias por cuantiles y fecuecias al dividir el conjunto de datos en 3 partes iguales. Opcional: hacerlo por cuantiles.
+	* Calcular valores MAX, MIN y rango, en terminos de puntos (valores discretos).
+	*** La lista de probabilidades por puntos al finalizar el partido comenzara por el valor máximo al final de Q3 e ira hasta el puntaje máximo registrado
+	*  
+
 	* Identificar valores de la var_dep que son superiores, iguales o minimamente inferiores (máximo -0.03 unidades) a sus valores predichos.
 	* Calcular las magnitudes de la diferencia entre var_dep (ej: Avg_Match) y var_ind (ej: Avg_Q1_Q3).
 	* Identificar las magnitudes positivas o iguales a 0.
