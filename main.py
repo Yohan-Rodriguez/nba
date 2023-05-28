@@ -114,7 +114,7 @@ def see_forecast():
     # try:
     #     # Mostrar el primer mensaje
     #     select_league = int(input(msn_to_show_leagues + '\n\n\t-> '))
-    #
+     #
     #     if 0 < select_league <= len(list_leagues):
     #         # Obtener el ID de la liga seleccionada por medio de la
     #         # posición de la lista que contiene el ID de la liga dada.
