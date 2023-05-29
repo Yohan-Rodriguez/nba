@@ -147,8 +147,6 @@ def cal_analysis_statistic(df_get_statistics, name_team, is_home=2):
                                     '+Area_3std': y_pred + 3*std_error,
                                     # Columna con el valor limite inferior a 3 std_error de distancia de la línea de tendencia.
                                     '-Area_3std': y_pred - 3*std_error,
-                                    # Distancia exacta de cada punto a la linea de tendencia.
-                                    'Ouliers': (df_temp[j_dep]-y_pred) / std_error,
                                     # Probabilidad Acumulativa.
                                     'Cumulative_Prob': df_temp['Avg_Match'].cumsum() / df_temp['Avg_Match'].sum(),
                                     # Dendisdad de probabilidad.
@@ -163,20 +161,20 @@ def cal_analysis_statistic(df_get_statistics, name_team, is_home=2):
                                     'Is_Win': df_temp['Is_Win']
                                     }
                 
-                # Crear DataFrame
+                # Crear DataFrame de los datos ne la gráfica.
                 df_graphic = pd.DataFrame(data=dict_df_graphic)
                 
                 # ==================================================================================================== #
                 # DATA 3 EQUAL PARTS                                                                                   #
                 # ==================================================================================================== #
-                # Valores mínimos de la var_ind.
+                # Valore mínimo y máximo de la var_ind.
                 min_value_i_ind = df_temp[i_ind].min()
                 max_value_i_ind = df_temp[i_ind].max()
                 
                 # Número de partes iguales a dividir el conjunto de datos.
                 num_parts = 3
                 
-                # Enco0ntrar el valor para las divisiones
+                # Encontrar el ancho de igual tamaño para cada división.
                 value_part = (max_value_i_ind - min_value_i_ind) / num_parts
                 
                 # Valores de var_ind donde se ubican las asintotas.
@@ -189,86 +187,181 @@ def cal_analysis_statistic(df_get_statistics, name_team, is_home=2):
                 # CREATE COLUMN WITH CONDITIONS AND MORE...                                                            #
                 # ==================================================================================================== #
                 def crate_column_with_conditions(conditions, choices, obs, name_new_column):
-                    # Agregar nueva columna "Area" al dataframe, según sea la condición que se cumpla.
-                    df_graphic[name_new_column] = np.select(conditions, choices, default=0)
-                    # Lista con número de observaciones por cada área.
-                    list_temp_conditions = []
-                    
-                    # Lista con los porcentajes de las observaciones por cada área.
-                    list_temp_perecents =[]
-                    
-                    for i_cho in choices:                    
-                        # Calcular el número de observaciones por cada área.
-                        list_temp_conditions.append(len(df_graphic[df_graphic[name_new_column] == i_cho]))
+                    if obs != None:
+                        # Agregar nueva columna "Area" al dataframe, según sea la condición que se cumpla.
+                        df_graphic[name_new_column] = np.select(conditions, choices, default=0)
+                        # Lista con número de observaciones por cada área.
+                        list_temp_conditions = []
                         
-                        # Calcular el porcentaje de observaciones por cada área.
-                        list_temp_perecents.append(list_temp_conditions[-1]*100/obs)
-
-                    return list_temp_conditions, list_temp_perecents
-                # END --------- CREATE COLUMN WITH CONDITIONS AND MORE...                                          # # #
-                # ==================================================================================================== #                
+                        # Lista con los porcentajes de las observaciones por cada área.
+                        list_temp_perecents =[]
+                        
+                        for i_cho in choices:                    
+                            # Calcular el número de observaciones por cada área.
+                            list_temp_conditions.append(len(df_graphic[df_graphic[name_new_column] == i_cho]))
+                            
+                            # Calcular el porcentaje de observaciones por cada área.
+                            list_temp_perecents.append(list_temp_conditions[-1]*100/obs)
+    
+                        return list_temp_conditions, list_temp_perecents
                     
+                    elif obs == None:
+                        # Agregar nueva columna "Area" al dataframe, según sea la condición que se cumpla.
+                        df_graphic[name_new_column] = np.select(conditions, choices, default=0)
+                # END --------- CREATE COLUMN WITH CONDITIONS AND MORE...                                          # # #
+                # ==================================================================================================== #                               
+                
+                # Distancia exacta de cada punto a la linea de tendencia.
+                conditions_is_upper_line = [
+                                             ((df_temp[j_dep]-y_pred) / std_error >= 0),
+                                             ((df_temp[j_dep]-y_pred) / std_error < 0)
+                                           ]
+                
+                # 1 si es número positivo o 0 (igual o por encima de la línea de tendencia).
+                # 0 si es un número negativo (por debajo de la línea de tendencia).
+                choices_is_uper_line = [1, 0]
+                
+                crate_column_with_conditions(conditions_is_upper_line, choices_is_uper_line, obs=None, name_new_column='is_upper_line')
+                
                 # Número de observaciones                
                 obs = df_temp[j_dep].count()
                 
+                # Agregar nueva columna llamada "Area"
+                # Esta columna contiene el área a la que pertenece cada Obs. al rededor de la línea de tendencia.
                 # Condiciones para los datos en la nueva columna "Area"
-                conditions = [(df_temp[j_dep] <= df_graphic['+Area_1std']) & (df_temp[j_dep] >= df_graphic['-Area_1std']),
-                              ((df_temp[j_dep] >= df_graphic['-Area_2std']) & (df_temp[j_dep] < df_graphic['-Area_1std'])) 
-                              | ((df_temp[j_dep] <= df_graphic['+Area_2std']) & (df_temp[j_dep] > df_graphic['+Area_1std'])),
-                              ((df_temp[j_dep] >= df_graphic['-Area_3std']) & (df_temp[j_dep] < df_graphic['-Area_2std'])) 
-                              | ((df_temp[j_dep] <= df_graphic['+Area_3std']) & (df_temp[j_dep] > df_graphic['+Area_2std'])),
-                              (df_temp[j_dep] > df_graphic['+Area_3std']) | (df_temp[j_dep] < df_graphic['-Area_3std']) 
-                             ]
+                conditions_areas = [
+                                      (df_temp[j_dep] <= df_graphic['+Area_1std']) & (df_temp[j_dep] >= df_graphic['-Area_1std']),
+                                      ((df_temp[j_dep] >= df_graphic['-Area_2std']) & (df_temp[j_dep] < df_graphic['-Area_1std'])) 
+                                      | ((df_temp[j_dep] <= df_graphic['+Area_2std']) & (df_temp[j_dep] > df_graphic['+Area_1std'])),
+                                      ((df_temp[j_dep] >= df_graphic['-Area_3std']) & (df_temp[j_dep] < df_graphic['-Area_2std'])) 
+                                      | ((df_temp[j_dep] <= df_graphic['+Area_3std']) & (df_temp[j_dep] > df_graphic['+Area_2std'])),
+                                      (df_temp[j_dep] > df_graphic['+Area_3std']) | (df_temp[j_dep] < df_graphic['-Area_3std']) 
+                                   ]
                 
                 # Sí está en la zona ± 1 std_error de la línea de tendencia, su área es 1
                 # Sí está en la zona ± 2 std_error de la línea de tendencia, su área es 2
                 # Sí está en la zona ± 3 std_error de la línea de tendencia, su área es 3
                 # Sí está en la zona con distancia mayor a 3 std_error de la línea de tendencia, su área es 4
-                choices = [1, 2, 3, 4]
+                choices_areas = [1, 2, 3, 4]
                                 
-                column_conditions_area = crate_column_with_conditions(conditions, choices, obs, name_new_column='Area')
-                del conditions, choices
+                column_conditions_area = crate_column_with_conditions(conditions_areas, choices_areas, obs, name_new_column='Area')
                 
+                # Agregar nueva columna llamada "Sub_Set"
+                # Esta columna contiene el subconjunto a la que pertenece cada Obs. en función de la var_ind
                 # Rango de los 3 subconjuntos.
                 # Condiciones para los datos en la nueva columna "Sub_Set"                                
-                conditions = [(df_temp[i_ind] >= min_value_i_ind) & (df_temp[i_ind] < first_part),
-                              (df_temp[i_ind] >= first_part) & (df_temp[i_ind] < second_part),
-                              (df_temp[i_ind] >= second_part) & (df_temp[i_ind] <= max_value_i_ind)
-                             ]               
+                conditions_sub_sets = [
+                                        # Rango para los promedio bajos
+                                        (df_temp[i_ind] >= min_value_i_ind) & (df_temp[i_ind] < first_part),
+                                        # Rango para los promedio medios
+                                        (df_temp[i_ind] >= first_part) & (df_temp[i_ind] < second_part),
+                                        # Rango para los promedio altos.
+                                        (df_temp[i_ind] >= second_part) & (df_temp[i_ind] <= max_value_i_ind)
+                                     ]               
                 
-                # Sí está en el subconjunto izquierdo (1) del rango de var_ind, se asigna 1
-                # Sí está en el subconjunto medio (2) del rango de var_ind, se asigna 2
-                # Sí está en el subconjunto derecho (3) del rango de var_ind, se asigna 3
-                choices = [1, 2, 3]
-                column_conditions_sub_set = crate_column_with_conditions(conditions, choices, obs, name_new_column='Sub_Set')
+                # Sí está en el subconjunto izquierdo (promedioas bajos) del rango de var_ind, se asigna 1
+                # Sí está en el subconjunto medio (promedioas medios) del rango de var_ind, se asigna 2
+                # Sí está en el subconjunto derecho (promedioas altos) del rango de var_ind, se asigna 3
+                choices_sub_sets = [1, 2, 3]
+                column_conditions_sub_set = crate_column_with_conditions(conditions_sub_sets, choices_sub_sets, obs, name_new_column='Sub_Set')
+                
                 # list_see_columns_df_graphic =  ['DIFF_F', 'DIFF_Q3', f'{i_ind}', f'{j_dep}', 'Predicted', 'Predicted_ok?', 'Ouliers', 
                 #                                 'Cumulative_Prob', 'Probability_Density', 'Residuals', 'Is_Win', 'Area']
                 
                 # Columnas del DataFrame a mostrar.
-                list_see_columns_df_graphic =  [f'{i_ind}', f'{j_dep}', '+Area_1std', '-Area_1std', 'Area', 'Ouliers', 'Sub_Set']
+                list_see_columns_df_graphic =  [f'{i_ind}', f'{j_dep}', 'Area', 'Sub_Set', 'is_upper_line', ]
                 
                 # Titulo del Dataframe
                 print(f'\n\n\n{name_team} as {str_is_home}: {i_ind} - {j_dep}\n')
                 
-                # Imprimir el DataFrame
-                print(df_graphic[list_see_columns_df_graphic])          
+                # Imprimir el DataFrame con las columnas seleccionadas.
+                print(df_graphic[list_see_columns_df_graphic])
+                
+                
+                # Dividir las Obs. por subconjunto y área específica.
+                # Calcular el % de las observaciones por subconjunto y área específica.
+                # Número de Obs. en el Sub_Set 1
+                
+                # Lista que contiene el núemro de Obs. por cada Sub_Set
+                lis_count_sub_set_x = [column_conditions_sub_set[0][0], column_conditions_sub_set[0][1], column_conditions_sub_set[0][2]]
+                # lis_count_sub_set_x = [Número de Obs. en el Sub_Set 1, Número de Obs. en el Sub_Set 2, Número de Obs. en el Sub_Set 3]
 
-                sub_set_1_count = 100 / df_graphic['Sub_Set'].value_counts()[1]
-                sub_set_2_count = 100 / df_graphic['Sub_Set'].value_counts()[2]
-                sub_set_3_count = 100 / df_graphic['Sub_Set'].value_counts()[3]
-            
-                sub_set_1_area_1 = round(len(df_graphic[(df_graphic['Area'] == 1) & (df_graphic['Sub_Set'] == 1)]) * sub_set_1_count, 2)
-                sub_set_1_area_2 = round(len(df_graphic[(df_graphic['Area'] == 2) & (df_graphic['Sub_Set'] == 1)]) * sub_set_1_count, 2)
-                sub_set_1_area_3 = round(len(df_graphic[(df_graphic['Area'] == 3) & (df_graphic['Sub_Set'] == 1)]) * sub_set_1_count, 2)
-                sub_set_1_area_4 = round(len(df_graphic[(df_graphic['Area'] == 4) & (df_graphic['Sub_Set'] == 1)]) * sub_set_1_count, 2)
-                sub_set_2_area_1 = round(len(df_graphic[(df_graphic['Area'] == 1) & (df_graphic['Sub_Set'] == 2)]) * sub_set_2_count, 2)
-                sub_set_2_area_2 = round(len(df_graphic[(df_graphic['Area'] == 2) & (df_graphic['Sub_Set'] == 2)]) * sub_set_2_count, 2)
-                sub_set_2_area_3 = round(len(df_graphic[(df_graphic['Area'] == 3) & (df_graphic['Sub_Set'] == 2)]) * sub_set_2_count, 2)
-                sub_set_2_area_4 = round(len(df_graphic[(df_graphic['Area'] == 4) & (df_graphic['Sub_Set'] == 2)]) * sub_set_2_count, 2)
-                sub_set_3_area_1 = round(len(df_graphic[(df_graphic['Area'] == 1) & (df_graphic['Sub_Set'] == 3)]) * sub_set_3_count, 2)
-                sub_set_3_area_2 = round(len(df_graphic[(df_graphic['Area'] == 2) & (df_graphic['Sub_Set'] == 3)]) * sub_set_3_count, 2)
-                sub_set_3_area_3 = round(len(df_graphic[(df_graphic['Area'] == 3) & (df_graphic['Sub_Set'] == 3)]) * sub_set_3_count, 2)
-                sub_set_3_area_4 = round(len(df_graphic[(df_graphic['Area'] == 4) & (df_graphic['Sub_Set'] == 3)]) * sub_set_3_count, 2)
+                # Lista que contiene el número de Obs. por cada <sub_set_x - area_x>
+                list_num_obs_setx_areax = []                
+                # Caluclar número de Obs. por cada sub_set_x - area_x y agregarlo a "list_num_obs_setx_areax"
+                for i_sub_set in range(1, len(choices_sub_sets)+1):
+                    for i_area in range(1, len(choices_areas)+1):
+                        list_num_obs_setx_areax.append(len(df_graphic[(df_graphic['Area'] == i_area) & (df_graphic['Sub_Set'] == i_sub_set)]))    
+                
+                # Lista que contiene los porcentajes de Obs. por cada <sub_set_x - area_x>
+                list_percent_obs_setx_areax = []                
+                # temp para Sub_set_x
+                i_coutn_temp = 0
+                # Calcular el porcentaje de cada sub_set_x - area_x
+                for i_percent in range(len(list_num_obs_setx_areax)):
+                    list_percent_obs_setx_areax.append(round(list_num_obs_setx_areax[i_percent] * 100 / lis_count_sub_set_x[i_coutn_temp], 2))
+                    if 3 == i_percent:
+                        i_coutn_temp += 1
+                        
+                    elif 7 == i_percent:
+                        i_coutn_temp += 1
+                    
+                # DataFrame cons las distribuciones de los datos por subconjuntos y áreas.
+                df_sub_sets_areas = pd.DataFrame(data={
+                                                        'Sub_Set_1': [list_num_obs_setx_areax[0], list_num_obs_setx_areax[1],
+                                                                      list_num_obs_setx_areax[2], list_num_obs_setx_areax[3]],
+                                                        '%_ss_1_a_x': [list_percent_obs_setx_areax[0], list_percent_obs_setx_areax[1],
+                                                              list_percent_obs_setx_areax[2], list_percent_obs_setx_areax[3]],
+                                                        'Sub_Set_2': [list_num_obs_setx_areax[4], list_num_obs_setx_areax[5],
+                                                                      list_num_obs_setx_areax[6], list_num_obs_setx_areax[7]],
+                                                        '%_ss_2_a_x': [list_percent_obs_setx_areax[4], list_percent_obs_setx_areax[5],
+                                                              list_percent_obs_setx_areax[6], list_percent_obs_setx_areax[7]],
+                                                        'Sub_Set_3': [list_num_obs_setx_areax[8], list_num_obs_setx_areax[9],
+                                                                      list_num_obs_setx_areax[10], list_num_obs_setx_areax[11]],
+                                                        '%_ss_3_a_x': [list_percent_obs_setx_areax[8], list_percent_obs_setx_areax[9],
+                                                              list_percent_obs_setx_areax[10], list_percent_obs_setx_areax[11]],
+                                                      })
+                indices_areas = ['Area_1', 'Area_2', 'Area_3', 'Area_4']
+                df_sub_sets_areas.set_index(pd.Index(indices_areas), inplace=True)
+                
+                # Obtener suma de las columnas de "df_sub_sets_areas"
+                sum_columns_df_sub_sets_areas = df_sub_sets_areas.sum()
+                
+                # Crear o agregar nueva fila con la suma de cada columna
+                df_sub_sets_areas.loc['sum'] = sum_columns_df_sub_sets_areas
+                
+                print('\nDataFrame Sub_Set_x - Area_x:\n')
+                print(df_sub_sets_areas)
+
+                # ==================================================================================================== #
+                # DATAFRAME RANGES                                                                                     #
+                # ==================================================================================================== #
+                # Crear DataFrame para determinar los datos del rango en la var_ind entre Avg_Q1 a Avg_Q3
+                columns_df_range = ['Avg_Q1', 'Avg_Q2', 'Avg_Q3']
+                
+                # DataFrame.
+                df_ranges = df_temp[columns_df_range].copy()
+                
+                # Media entre las columnas <'Avg_Q1', 'Avg_Q2', 'Avg_Q3'>
+                # "axis=1" para que los métodos de min(), max()... trabajen sobre las filas
+                df_ranges['Mean_range'] = df_temp[columns_df_range].mean(axis=1)
+                
+                # Std entre las columnas <'Avg_Q1', 'Avg_Q2', 'Avg_Q3'>
+                df_ranges['Std_Range'] = df_temp[columns_df_range].std(axis=1)
+                
+                # Valor máximo de las columnas <'Avg_Q1', 'Avg_Q2', 'Avg_Q3'> en cada fila
+                df_ranges['Max'] = df_temp[columns_df_range].max(axis=1)
+                
+                # Valor mínimo de las columnas <'Avg_Q1', 'Avg_Q2', 'Avg_Q3'> en cada fila
+                df_ranges['Min'] = df_temp[columns_df_range].min(axis=1)
+                
+                # rengo de los valores de las columnas <'Avg_Q1', 'Avg_Q2', 'Avg_Q3'> en cada fila
+                df_ranges['Range'] = df_ranges['Max'] - df_ranges['Min']
+                print('new')
+                print(df_ranges)
+                # END --------- DATAFRAME RANGES                                                                   # # #
+                # ==================================================================================================== #
+
                 # END --------- PERZONALIZED DATAFRAME FOR GRAPHICS                                                # # #
                 # ==================================================================================================== #
 
@@ -299,17 +392,20 @@ def cal_analysis_statistic(df_get_statistics, name_team, is_home=2):
                 range_upper_2 = range_upper_1 + std_error
 
                 # Dibujar la primera área sombreada (1 std de distancia a la línea de tendencia "y = mx + b")
-                ax.fill_between(df_temp[i_ind], range_lower_1, range_upper_1, alpha=1, color='#bef202')             
+                ax.fill_between(df_temp[i_ind], range_lower_1, range_upper_1, alpha=0.9, color='#aab69b')             
 
                 # Dibujar la segunda área sombreada (2 std de distancia a la línea de tendencia "y = mx + b")
-                ax.fill_between(df_temp[i_ind], range_lower_2, range_upper_2, alpha=0.3, color='#fea304')  
+                ax.fill_between(df_temp[i_ind], range_lower_2, range_upper_2, alpha=0.4, color='#aab69b')  
 
                 # Dibujar la tercera área sombreada (3 std de distancia a la línea de tendencia "y = mx + b")
-                ax.fill_between(df_temp[i_ind], range_lower_2-std_error, range_upper_2+std_error, alpha=0.2, color='#b6ff00')                               
+                ax.fill_between(df_temp[i_ind], range_lower_2-std_error, range_upper_2+std_error, alpha=0.1, color='#aab69b')                               
                 
-                # Crear gráfico  de dispersión con Seaborn
+                # Condiciones para establecer los colores de los puntos de l gráfica
+                edgecolors_ax = np.where((df_ranges['Std_Range'] <= 0.27), '#00cc00', 
+                         np.where((df_ranges['Std_Range'] > 0.33), 'red', 'blue'))
+
                 sns.regplot(x=df_temp[i_ind], y=df_temp[j_dep], ci=None, data=df_temp[[i_ind, j_dep]],
-                            scatter_kws={'color': 'blue'}, line_kws={'color': '#f5061d'}, ax=ax)
+                            scatter_kws={'color': 'blue', 'linewidths': 4, 'edgecolors': edgecolors_ax}, line_kws={'color':'yellow'}, ax=ax)
                 
                 # Leyenda en la parte superior de la gráfica con la ecuación de la recta.
                 msn_one_graphics = f'{equation}'
@@ -323,15 +419,15 @@ def cal_analysis_statistic(df_get_statistics, name_team, is_home=2):
                 msn_3_graphics = f'\nAREAS PERCENTAGE:\n  Num. Outliers: {column_conditions_area[0][3]}\n  ± 1 STD error: {column_conditions_area[1][0]}%'\
                                  f'\n  ± 2 STD error: {column_conditions_area[1][1]}%\n  ± 3 STD error: {column_conditions_area[1][2]}%'\
                                  f'\n  (> | <) ± 3 STD error: {column_conditions_area[1][3]}%\n\nSUB_SETS PERCENTEGE\n  Obs. Sub_Set 1 '\
-                                 f'({column_conditions_sub_set[0][0]}): {column_conditions_sub_set[1][0]}%\n  Obs. Sub_Set 2 '\
-                                 f'({column_conditions_sub_set[0][1]}): {column_conditions_sub_set[1][1]}%\n  Obs. Sub_Set 3 '\
-                                 f'({column_conditions_sub_set[0][2]}): {column_conditions_sub_set[1][2]}%\n\nPERCENTEGES SUB_SETS-AREAS:'\
-                                 f'\n  Sub_Set 1 - Area 1: {sub_set_1_area_1}%\n  Sub_Set 1 - Area_2: {sub_set_1_area_2}%'\
-                                 f'\n  Sub_Set 1 - Area_3: {sub_set_1_area_3}%\n  Sub_Set 1 - Area_4: {sub_set_1_area_4}%'\
-                                 f'\n  Sub_Set 2 - Area 1: {sub_set_2_area_1}%\n  Sub_Set 2 - Area_2: {sub_set_2_area_2}%'\
-                                 f'\n  Sub_Set 2 - Area_3: {sub_set_2_area_3}%\n  Sub_Set 2 - Area_4: {sub_set_2_area_4}%'\
-                                 f'\n  Sub_Set 3 - Area 1: {sub_set_3_area_1}%\n  Sub_Set 3 - Area_2: {sub_set_3_area_2}%'\
-                                 f'\n  Sub_Set 3 - Area_3: {sub_set_3_area_3}%\n  Sub_Set 3 - Area_4: {sub_set_3_area_4}%'\
+                                 f'({lis_count_sub_set_x[0]}): {column_conditions_sub_set[1][0]}%\n  Obs. Sub_Set 2 '\
+                                 f'({lis_count_sub_set_x[1]}): {column_conditions_sub_set[1][1]}%\n  Obs. Sub_Set 3 '\
+                                 f'({lis_count_sub_set_x[2]}): {column_conditions_sub_set[1][2]}%\n\nPERCENTEGES SUB_SETS-AREAS:'\
+                                 f'\n  Sub_Set 1 - Area 1 ({list_num_obs_setx_areax[0]}): {list_percent_obs_setx_areax[0]}%\n  Sub_Set 1 - Area_2 ({list_num_obs_setx_areax[1]}): {list_percent_obs_setx_areax[1]}%'\
+                                 f'\n  Sub_Set 1 - Area_3 ({list_num_obs_setx_areax[2]}): {list_percent_obs_setx_areax[2]}%\n  Sub_Set 1 - Area_4 ({list_num_obs_setx_areax[3]}): {list_percent_obs_setx_areax[3]}%'\
+                                 f'\n  Sub_Set 2 - Area 1 ({list_num_obs_setx_areax[4]}): {list_percent_obs_setx_areax[4]}%\n  Sub_Set 2 - Area_2 ({list_num_obs_setx_areax[5]}): {list_percent_obs_setx_areax[5]}%'\
+                                 f'\n  Sub_Set 2 - Area_3 ({list_num_obs_setx_areax[6]}): {list_percent_obs_setx_areax[6]}%\n  Sub_Set 2 - Area_4 ({list_num_obs_setx_areax[7]}): {list_percent_obs_setx_areax[7]}%'\
+                                 f'\n  Sub_Set 3 - Area 1 ({list_num_obs_setx_areax[8]}): {list_percent_obs_setx_areax[8]}%\n  Sub_Set 3 - Area_2 ({list_num_obs_setx_areax[9]}): {list_percent_obs_setx_areax[9]}%'\
+                                 f'\n  Sub_Set 3 - Area_3 ({list_num_obs_setx_areax[10]}): {list_percent_obs_setx_areax[10]}%\n  Sub_Set 3 - Area_4 ({list_num_obs_setx_areax[11]}): {list_percent_obs_setx_areax[11]}%'\
                 
                 msn_two_graphics += msn_3_graphics
                 
@@ -358,8 +454,8 @@ def cal_analysis_statistic(df_get_statistics, name_team, is_home=2):
                             ((intercept + b1 * df_temp[i_ind].max() + std_error*3) + lim_y))
                 
                 # Agregar asintotas verticales
-                ax.axvline(x=first_part, color='purple', linestyle='--', alpha=0.3)
-                ax.axvline(x=second_part, color='purple', linestyle='--', alpha=0.3)
+                ax.axvline(x=first_part, color='green', linestyle='--', alpha=0.5)
+                ax.axvline(x=second_part, color='green', linestyle='--', alpha=0.5)
                 
                 # Cuadrícula solo en la figura del la gráfica.
                 ax.grid()
